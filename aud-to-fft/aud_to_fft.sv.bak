@@ -1,0 +1,35 @@
+module audio_to_fft (
+    input  clk,
+    input  sample_end,
+    input  sample_req,
+    output [15:0] audio_output,
+    input  [15:0] audio_input,
+    input  [3:0]  control
+);
+
+reg channel = 1'b0;
+
+always @(posedge clk) begin
+    if (sample_end) begin
+        last_sample <= audio_input;
+    end
+
+    if (sample_req) begin
+        if (control[FEEDBACK] && channel == 1'b0) begin
+            dat <= 16'b0;
+				channel <= 1'b1;
+		  end else if (control[FEEDBACK] && channel == 1'b1) begin
+				dat <= 16'b0;
+				channel <= 1'b0;
+        end else if (control[SINE]) begin
+            dat <= romdata[index];
+            if (index == 7'd99)
+                index <= 7'd00;
+            else
+                index <= index + 1'b1;
+        end else
+            dat <= 16'd0;
+    end
+end
+
+endmodule
