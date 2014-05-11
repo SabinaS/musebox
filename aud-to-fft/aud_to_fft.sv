@@ -69,19 +69,7 @@ fft_module fft_in (
 	.inverse (1'b0)
 );
 
-signal_tap	fft_tap_real (
-	.acq_clk ( fft_clk ),
-	.acq_data_in ( fft_in_soreal ),
-	.acq_trigger_in ( fft_in_sovalid )
-);
-signal_tap	fft_tap_imag (
-	.acq_clk ( fft_clk ),
-	.acq_data_in ( fft_in_soimag ),
-	.acq_trigger_in ( fft_in_sovalid )
-);
-
 // FFT for equalizer to audio
-wire fft_out_can_accept_input;
 wire fft_out_sisop;
 wire fft_out_sieop;
 wire fft_out_sivalid;
@@ -154,7 +142,7 @@ end
 always @(posedge aud_clk) begin
 	// The fifo is not empty
 	if (fifo_out_cnt >= 12'b0 && chan_req) begin
-		audio_output <= ({34'd0, fifo_out_out} >>> exponent) >> 12;
+		audio_output <= fifo_out_out >> 12;
 		// Acknowledge that we've read this data
 		fifo_out_rdreq <= 1'b1;
 	end else begin

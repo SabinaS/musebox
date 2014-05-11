@@ -606,10 +606,8 @@ set_global_assignment -name QIP_FILE output_files/dc_fifo_sm.qip
 set_global_assignment -name SYSTEMVERILOG_FILE "aud-to-fft/equalizer.sv"
 set_global_assignment -name QIP_FILE fir_equalizer/fir_equalizer.qip
 set_global_assignment -name SIP_FILE fir_equalizer/fir_equalizer.sip
-set_global_assignment -name QIP_FILE signal_type/signal_tap.qip
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE output_files/stp1.stp
-set_global_assignment -name SIGNALTAP_FILE output_files/stp1.stp
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "audio_to_fft:atf_left|fill_fft" -section_id auto_signaltap_0
