@@ -3,8 +3,10 @@ module audio_codec (
     input  reset,
     output [1:0]  sample_end,
     output [1:0]  sample_req,
-    input  [15:0] audio_output,
-    output [15:0] audio_input,
+    input  [15:0] audio_output_l,
+	 input  [15:0] audio_output_r,
+    output [15:0] audio_input_l,
+    output [15:0] audio_input_r,
     // 1 - left, 0 - right
     input  [1:0] channel_sel,
 
@@ -20,7 +22,6 @@ reg [7:0] lrck_divider;
 reg [1:0] bclk_divider;
 
 reg [15:0] shift_out;
-reg [15:0] shift_temp;
 reg [15:0] shift_in;
 reg [15:0] shift_in_right;
 
@@ -44,7 +45,8 @@ end
 
 assign sample_end[1] = (lrck_divider == 8'h40);
 assign sample_end[0] = (lrck_divider == 8'hc0);
-assign audio_input = shift_in;
+assign audio_input_l = shift_in;
+assign audio_input_r = shift_in_right;
 assign sample_req[1] = (lrck_divider == 8'hfe);
 assign sample_req[0] = (lrck_divider == 8'h7e);
 
@@ -59,16 +61,17 @@ always @(posedge clk) begin
     if (reset) begin
         shift_out <= 16'h0;
         shift_in <= 16'h0;
-        shift_in <= 16'h0;
 		  shift_in_right <= 16'h0;
     end else if (set_lrck || clr_lrck) begin
         // check if current channel is selected
         if (channel_sel[set_lrck]) begin
-            shift_out <= audio_output;
-            shift_temp <= audio_output;
-            shift_in <= 16'h0;
+            shift_out <= audio_output_l;
+				shift_in <= 16'h0;
         // repeat the sample from the other channel if not
-        end else shift_out <= shift_in_right;
+        end else begin 
+		      shift_out <= audio_output_r;
+				shift_in_right <= 16'h0;
+			end
     end else if (set_bclk == 1) begin
         // only read in if channel is selected
         if (channel_sel[lrck])

@@ -76,6 +76,9 @@ module SoCKit_top(
 		  DDR3_WE_n,
 `endif /*ENABLE_DDR3*/
 
+		  /////////FAN/////////
+		  FAN_CTRL,
+
 `ifdef ENABLE_HPS
 		  /////////HPS/////////
 		  HPS_CLOCK_25,
@@ -179,12 +182,47 @@ module SoCKit_top(
 		  OSC_50_B5B,
 		  OSC_50_B8A,
 
+		  /////////PCIE/////////
+		  PCIE_PERST_n,
+		  PCIE_WAKE_n,
+
 		  /////////RESET/////////
 		  RESET_n,
 
+		  /////////SI5338/////////
+		  SI5338_SCL,
+		  SI5338_SDA,
+
 		  /////////SW/////////
 		  SW,
-		  
+
+		  /////////TEMP/////////
+		  TEMP_CS_n,
+		  TEMP_DIN,
+		  TEMP_DOUT,
+		  TEMP_SCLK,
+
+		  /////////USB/////////
+		  USB_B2_CLK,
+		  USB_B2_DATA,
+		  USB_EMPTY,
+		  USB_FULL,
+		  USB_OE_n,
+		  USB_RD_n,
+		  USB_RESET_n,
+		  USB_SCL,
+		  USB_SDA,
+		  USB_WR_n,
+
+		  /////////VGA/////////
+		  VGA_B,
+		  VGA_BLANK_n,
+		  VGA_CLK,
+		  VGA_G,
+		  VGA_HS,
+		  VGA_R,
+		  VGA_SYNC_n,
+		  VGA_VS,
 		  ///////////hps//////////
 		  memory_mem_a,
 		  memory_mem_ba,
@@ -290,6 +328,9 @@ module SoCKit_top(
    output                                             DDR3_WE_n;
 `endif /*ENABLE_DDR3*/
 
+   ///////// FAN /////////
+   output                                             FAN_CTRL;
+
 `ifdef ENABLE_HPS
    ///////// HPS /////////
    input                                              HPS_CLOCK_25;
@@ -391,11 +432,47 @@ module SoCKit_top(
    input                                              OSC_50_B5B;
    input                                              OSC_50_B8A;
 
+   ///////// PCIE /////////
+   input                                              PCIE_PERST_n;
+   input                                              PCIE_WAKE_n;
+
    ///////// RESET /////////
    input                                              RESET_n;
 
+   ///////// SI5338 /////////
+   inout                                              SI5338_SCL;
+   inout                                              SI5338_SDA;
+
    ///////// SW /////////
    input [3:0] 					      SW;
+
+   ///////// TEMP /////////
+   output                                             TEMP_CS_n;
+   output                                             TEMP_DIN;
+   input                                              TEMP_DOUT;
+   output                                             TEMP_SCLK;
+
+   ///////// USB /////////
+   input                                              USB_B2_CLK;
+   inout [7:0] 					      USB_B2_DATA;
+   output                                             USB_EMPTY;
+   output                                             USB_FULL;
+   input                                              USB_OE_n;
+   input                                              USB_RD_n;
+   input                                              USB_RESET_n;
+   inout                                              USB_SCL;
+   inout                                              USB_SDA;
+   input                                              USB_WR_n;
+
+   ///////// VGA /////////
+   output [7:0] 				      VGA_B;
+   output                                             VGA_BLANK_n;
+   output                                             VGA_CLK;
+   output [7:0] 				      VGA_G;
+   output                                             VGA_HS;
+   output [7:0] 				      VGA_R;
+   output                                             VGA_SYNC_n;
+   output                                             VGA_VS;
 
    /////////hps pin///////
    output wire [14:0] 				      memory_mem_a;                          
@@ -469,6 +546,29 @@ module SoCKit_top(
    //  REG/WIRE declarations
    //=======================================================
 
+   reg [31:0] 					      Cont;
+   wire 					      VGA_CTRL_CLK;
+   wire [9:0] 					      mVGA_R;
+   wire [9:0] 					      mVGA_G;
+   wire [9:0] 					      mVGA_B;
+   wire [19:0] 					      mVGA_ADDR;
+   wire 					      DLY_RST;
+
+   //	For VGA Controller
+   wire 					      mVGA_CLK;
+   wire [9:0] 					      mRed;
+   wire [9:0] 					      mGreen;
+   wire [9:0] 					      mBlue;
+   wire 					      VGA_Read;	//	VGA data request
+
+   wire [9:0] 					      recon_VGA_R;
+   wire [9:0] 					      recon_VGA_G;
+   wire [9:0] 					      recon_VGA_B;
+
+   //	For Down Sample
+   wire [3:0] 					      Remain;
+   wire [9:0] 					      Quotient;
+
    // Make the FPGA reset cause an HPS reset
    reg [19:0] 					      hps_reset_counter = 20'h0;
    reg 						      hps_fpga_reset_n = 0;
@@ -485,9 +585,17 @@ wire audio_clk;
 
 wire [1:0] sample_end;
 wire [1:0] sample_req;
-wire [15:0] audio_output;
-wire [15:0] audio_input;
-wire chan;
+wire [15:0] audio_output_l;
+wire [15:0] audio_output_r;
+wire [15:0] audio_input_l;
+wire [15:0] audio_input_r;
+wire channel;
+
+// VGA debug wires
+wire [15:0] vga_dat;
+wire vga_dowrite;
+wire vga_select;
+wire [1:0] vga_addr;
 
 clock_pll pll (
     .refclk (OSC_50_B8A),
@@ -512,8 +620,10 @@ audio_codec ac (
     .reset (reset),
     .sample_end (sample_end),
     .sample_req (sample_req),
-    .audio_output (audio_output),
-    .audio_input (audio_input),
+    .audio_output_l (audio_output_l),
+    .audio_output_r (audio_output_r),
+    .audio_input_l (audio_input_l),
+    .audio_input_r (audio_input_r),
     .channel_sel (2'b10),
 
     .AUD_ADCLRCK (AUD_ADCLRCK),
@@ -521,25 +631,42 @@ audio_codec ac (
     .AUD_DACLRCK (AUD_DACLRCK),
     .AUD_DACDAT (AUD_DACDAT),
     .AUD_BCLK (AUD_BCLK),
-	 .chan_sel (chan)
+	 .chan_sel (channel)
 );
 
-audio_effects ae (
-    .clk (audio_clk),
-    .sample_end (sample_end[1]),
-    .sample_req (sample_req[1]),
-    .audio_output (audio_output),
-    .audio_input  (audio_input),
-    .control (SW),
-	 .chan (chan)
-);
+//audio_effects ae (
+//    .clk (audio_clk),
+//    .sample_end (sample_end),
+//    .sample_req (sample_req),
+//    .audio_output_l (audio_output_l),
+//    .audio_output_r (audio_output_r),
+//    .audio_input_l  (audio_input_l),
+//    .audio_input_r  (audio_input_r),
+//    .control (SW)
+//	 //.chan (channel)
+//);
 // Audio Declarations
-audio_to_fft atf (
-	 .aud_clk (audio_clk),
-    .reset (reset),
-	 .fft_clk (OSC_50_B4A),
-	 .chan (chan),
-	 .audio_input (audio_input),
+//audio_to_fft atf_right (
+//	.aud_clk (audio_clk),
+//	.reset (reset),
+//	.fft_clk (OSC_50_B4A),
+//	.chan_req (sample_req[0]),
+//	.chan_end (sample_end[0]),
+//	.audio_input (audio_input_r),
+//	.audio_output (audio_output_r)
+//);
+audio_to_fft atf_left (
+	.aud_clk (audio_clk),
+	.reset (reset),
+	.fft_clk (OSC_50_B4A),
+	.chan_req (sample_req[1]),
+	.chan_end (sample_end[1]),
+	.audio_input (audio_input_l),
+	.audio_output (audio_output_l),
+	.vga_dat (vga_dat),
+	.vga_dowrite (vga_dowrite),
+	.vga_select (vga_select),
+	.vga_addr (vga_addr)
 );
 
    lab3 u0 (
@@ -610,7 +737,19 @@ audio_to_fft atf (
             .hps_io_hps_io_uart0_inst_RX     		  (hps_io_hps_io_uart0_inst_RX),     //                .hps_io_uart0_inst_RX
             .hps_io_hps_io_uart0_inst_TX     		  (hps_io_hps_io_uart0_inst_TX),     //                .hps_io_uart0_inst_TX
             .hps_io_hps_io_i2c1_inst_SDA     		  (hps_io_hps_io_i2c1_inst_SDA),     //                .hps_io_i2c1_inst_SDA
-            .hps_io_hps_io_i2c1_inst_SCL     		  (hps_io_hps_io_i2c1_inst_SCL)      //                .hps_io_i2c1_inst_SCL
+            .hps_io_hps_io_i2c1_inst_SCL     		  (hps_io_hps_io_i2c1_inst_SCL),      //                .hps_io_i2c1_inst_SCL
+				.vga_R (VGA_R),
+				.vga_G (VGA_G),
+				.vga_B (VGA_B),
+				.vga_CLK (VGA_CLK),
+				.vga_HS (VGA_HS),
+				.vga_VS (VGA_VS),
+				.vga_BLANK_n (VGA_BLANK_n),
+				.vga_SYNC_n (VGA_SYNC_n),
+				.vga_mem_writedata (vga_dat),
+				.vga_mem_write (vga_dowrite),
+				.vga_mem_chipselect (vga_select),
+				.vga_mem_address (vga_addr)
 	    );
 
 endmodule
