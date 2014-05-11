@@ -69,11 +69,28 @@ fft_module fft_in (
 	.inverse (1'b0)
 );
 
+signal_tap	fft_tap_real (
+	.acq_clk ( fft_clk ),
+	.acq_data_in ( fft_in_soreal ),
+	.acq_trigger_in ( fft_in_sovalid )
+);
+signal_tap	fft_tap_imag (
+	.acq_clk ( fft_clk ),
+	.acq_data_in ( fft_in_soimag ),
+	.acq_trigger_in ( fft_in_sovalid )
+);
+
 // FFT for equalizer to audio
+wire fft_out_can_accept_input;
+wire fft_out_sisop;
+wire fft_out_sieop;
+wire fft_out_sivalid;
 wire fft_out_sovalid;
 wire fft_out_sosop;
 wire fft_out_soeop;
 wire [15:0] fft_out_soreal;
+wire [15:0] fft_out_sireal;
+wire [15:0] fft_out_siimag;
 wire [5:0] fft_out_exp;
 reg  [5:0] fft_out_exp_reg;
 fft_module fft_out (
@@ -137,7 +154,7 @@ end
 always @(posedge aud_clk) begin
 	// The fifo is not empty
 	if (fifo_out_cnt >= 12'b0 && chan_req) begin
-		audio_output <= fifo_out_out >> 12;
+		audio_output <= ({34'd0, fifo_out_out} >>> exponent) >> 12;
 		// Acknowledge that we've read this data
 		fifo_out_rdreq <= 1'b1;
 	end else begin
@@ -150,10 +167,13 @@ end
 reg [15:0] outpos;
 
 always @(posedge fft_clk) begin
-	if (fft_out_sovalid && fft_out_soeop) begin
-		outpos <= 16'd0;
+	if (fft_out_sovalid && fft_out_sosop) begin
+		outpos <= outpos + 16'd1;
 		fifo_out_wrreq <= 1'b1;
 		fft_out_exp_reg <= fft_out_exp;
+	end else if (fft_out_sovalid && fft_out_soeop) begin
+		outpos <= 16'd0;
+		fifo_out_wrreq <= 1'b1;
 	end else if (fft_out_sovalid) begin
 		fifo_out_wrreq <= 1'b1;
 		outpos <= outpos + 16'b1;
@@ -213,15 +233,6 @@ always @(posedge fft_clk) begin
 			// Acknowledge that we've read this word
 			rdreq <= 1'b1;
 			pos <= pos + 16'b1;
-			vga_dowrite <= 1'b1;
-			vga_select <= 1'b1;
-			if (fill % 4 == 2'd3) begin
-				vga_dat <= audio_input;
-			end else begin
-				vga_dat <= fill;
-			end
-			vga_addr <= fill % 4;
-			fill <= fill + 16'd1;
 		end
 	// Don't acknowledge that we've read anything yet
 	end else if (!fft_in_can_accept_input)
