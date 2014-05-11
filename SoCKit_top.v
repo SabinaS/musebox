@@ -634,16 +634,16 @@ audio_codec ac (
 	 .control (SW)
 );
 
-audio_effects ae (
-    .clk (audio_clk),
-    .sample_end (sample_end),
-    .sample_req (sample_req),
-    .audio_output_l (audio_output_l),
-    .audio_output_r (audio_output_r),
-    .audio_input_l  (audio_input_l),
-    .audio_input_r  (audio_input_r),
-    .control (SW)
-);
+//audio_effects ae (
+//    .clk (audio_clk),
+//    .sample_end (sample_end),
+//    .sample_req (sample_req),
+//    .audio_output_l (audio_output_l),
+//    .audio_output_r (audio_output_r),
+//    .audio_input_l  (audio_input_l),
+//    .audio_input_r  (audio_input_r),
+//    .control (SW)
+//);
 // Audio Declarations
 //audio_to_fft atf_right (
 //	.aud_clk (audio_clk),
@@ -654,19 +654,19 @@ audio_effects ae (
 //	.audio_input (audio_input_r),
 //	.audio_output (audio_output_r)
 //);
-//audio_to_fft atf_left (
-//	.aud_clk (audio_clk),
-//	.reset (reset),
-//	.fft_clk (OSC_50_B4A),
-//	.chan_req (sample_req[1]),
-//	.chan_end (sample_end[1]),
-//	.audio_input (audio_input_l),
-//	.audio_output (audio_output_l),
-//	.vga_dat (vga_dat),
-//	.vga_dowrite (vga_dowrite),
-//	.vga_select (vga_select),
-//	.vga_addr (vga_addr)
-//);
+audio_to_fft atf_left (
+	.aud_clk (audio_clk),
+	.reset (reset),
+	.fft_clk (OSC_50_B4A),
+	.chan_req (sample_req[1]),
+	.chan_end (sample_end[1]),
+	.audio_input (audio_input_l),
+	.audio_output (audio_output_l),
+	.vga_dat (vga_dat),
+	.vga_dowrite (vga_dowrite),
+	.vga_select (vga_select),
+	.vga_addr (vga_addr)
+);
 
    lab3 u0 (
             .clk_clk                               (OSC_50_B4A),                      //                 clk.clk

@@ -137,7 +137,7 @@ end
 always @(posedge aud_clk) begin
 	// The fifo is not empty
 	if (fifo_out_cnt >= 12'b0 && chan_req) begin
-		audio_output <= fifo_out_out;
+		audio_output <= fifo_out_out >> 12;
 		// Acknowledge that we've read this data
 		fifo_out_rdreq <= 1'b1;
 	end else begin
@@ -232,6 +232,10 @@ always @(posedge fft_clk) begin
 		rdreq <= 1'b0;
 		vga_dowrite <= 1'b1;
 		vga_select <= 1'b1;
+	end
+	// Record the exponent of the fft input block
+	if (fft_in_sosop) begin
+		fft_in_exp_reg <= fft_in_exp;
 	end
 end
 

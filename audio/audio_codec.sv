@@ -85,7 +85,7 @@ always @(posedge clk) begin
 				end
 		  end else begin
 				if (control[SINE]) begin
-					shift_in <= romdata[index];
+					shift_in_right <= romdata[index];
 					modIdx <= modIdx + 4'b1;
 					// Increase the index
 					if (modIdx == 4'b1111) begin
