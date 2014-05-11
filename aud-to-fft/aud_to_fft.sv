@@ -1,4 +1,4 @@
-parameter SAMPLES = 14'd8192;
+parameter SAMPLES = 13'd4096;
 
 module audio_to_fft (
    input  aud_clk,
@@ -18,7 +18,7 @@ module audio_to_fft (
 // FIFO
 wire wrreq;
 wire rdreq;
-wire [13:0] buf_cnt;
+wire [12:0] buf_cnt;
 // The output of the fifo goes right to the FFT
 wire [15:0] dc_out;
 wire fifo_in_aclr;
@@ -34,7 +34,7 @@ dc_fifo	fifo (
 );
 // End FIFO
 
-// FFT for audio to cpu
+// FFT for audio input
 wire fft_in_can_accept_input;
 wire fft_in_sisop;
 wire fft_in_sieop;
@@ -45,6 +45,8 @@ wire fft_in_soeop;
 wire [15:0] fft_in_soreal;
 wire [15:0] fft_in_soimag;
 wire fft_out_can_accept_input;
+wire [5:0] fft_in_exp;
+reg  [5:0] fft_in_exp_reg;
 
 fft_module fft_in (
 	.clk (fft_clk),
@@ -63,6 +65,7 @@ fft_module fft_in (
 	.source_sop (fft_in_sosop),
 	.source_eop (fft_in_soeop),
 	.source_valid (fft_in_sovalid),
+	.source_exp (fft_in_exp),
 	.inverse (1'b0)
 );
 
@@ -71,6 +74,8 @@ wire fft_out_sovalid;
 wire fft_out_sosop;
 wire fft_out_soeop;
 wire [15:0] fft_out_soreal;
+wire [5:0] fft_out_exp;
+reg  [5:0] fft_out_exp_reg;
 fft_module fft_out (
 	.clk (fft_clk),
 	.reset_n (!reset),
@@ -89,6 +94,7 @@ fft_module fft_out (
 	.source_sop (fft_out_sosop),
 	.source_eop (fft_out_soeop),
 	.source_valid (fft_out_sovalid),
+	.source_exp (fft_out_exp),
 	.inverse (1'b1)
 );
 // End FFT
@@ -97,7 +103,7 @@ fft_module fft_out (
 wire fifo_out_wrreq;
 wire fifo_out_rdreq;
 wire [15:0] fifo_out_out;
-wire [12:0] fifo_out_cnt;
+wire [11:0] fifo_out_cnt;
 wire fifo_out_aclr;
 dc_fifo_sm	fifo_out_real (
 	.wrclk (fft_clk),
@@ -111,8 +117,16 @@ dc_fifo_sm	fifo_out_real (
 );
 
 // Always write to the input fifo
+reg in_fifo_counter;
 always @(posedge aud_clk) begin
-	if (chan_end && !reset) begin
+//	if (reset) begin
+//		fifo_in_aclr <= 1'b1;
+//		in_fifo_counter <= 1'b1;
+//		wrreq <= 1'b0;
+//	end else if (in_fifo_counter) begin
+//		fifo_in_aclr <= 1'b0;
+//		in_fifo_counter <= 1'b0;
+	if (chan_end) begin
 		wrreq <= 1'b1;
 	end else begin
 		wrreq <= 1'b0;
@@ -122,7 +136,7 @@ end
 // Always read from the output fifo
 always @(posedge aud_clk) begin
 	// The fifo is not empty
-	if (fifo_out_cnt >= 13'b0 && chan_req) begin
+	if (fifo_out_cnt >= 12'b0 && chan_req) begin
 		audio_output <= fifo_out_out;
 		// Acknowledge that we've read this data
 		fifo_out_rdreq <= 1'b1;
@@ -139,6 +153,7 @@ always @(posedge fft_clk) begin
 	if (fft_out_sovalid && fft_out_soeop) begin
 		outpos <= 16'd0;
 		fifo_out_wrreq <= 1'b1;
+		fft_out_exp_reg <= fft_out_exp;
 	end else if (fft_out_sovalid) begin
 		fifo_out_wrreq <= 1'b1;
 		outpos <= outpos + 16'b1;
@@ -237,6 +252,7 @@ initial begin
 	fft_in_sieop <= 1'b0;
 	fifo_in_aclr <= 1'b0;
 	fifo_out_aclr <= 1'b0;
+	in_fifo_counter <= 1'b0;
 end
 
 endmodule
