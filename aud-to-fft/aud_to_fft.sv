@@ -1,5 +1,15 @@
 parameter SAMPLES = 13'd4096;
 
+module add_signed (
+	input  signed [5:0] A,
+	input  signed [5:0] B,
+	output signed [6:0] sum
+);
+
+assign sum = A + B + 6'sd12;
+
+endmodule
+
 module audio_to_fft (
    input  aud_clk,
 	input  fft_clk,
@@ -46,8 +56,7 @@ wire [15:0] fft_in_soreal;
 wire [15:0] fft_in_soimag;
 wire fft_out_can_accept_input;
 wire [5:0] fft_in_exp;
-reg  [5:0] fft_in_exp_reg;
-
+reg signed [5:0] fft_in_exp_reg;
 fft_module fft_in (
 	.clk (fft_clk),
 	.reset_n (!reset),
@@ -80,7 +89,7 @@ wire [15:0] fft_out_soreal;
 wire [15:0] fft_out_sireal;
 wire [15:0] fft_out_siimag;
 wire [5:0] fft_out_exp;
-reg  [5:0] fft_out_exp_reg;
+reg signed [5:0] fft_out_exp_reg;
 fft_module fft_out (
 	.clk (fft_clk),
 	.reset_n (!reset),
@@ -138,11 +147,48 @@ always @(posedge aud_clk) begin
 	end
 end
 
+// Shifting function
+function [15:0] shift_num;
+	input signed [6:0] exponent;
+	input [15:0] num;
+	
+	begin
+		case (exponent)
+			-6'sd15  : shift_num = {15'b0,num[0]};
+			-6'sd14  : shift_num = {14'b0,num[1:0]};
+			-6'sd13  : shift_num = {13'b0,num[2:0]};
+			-6'sd12  : shift_num = {12'b0,num[3:0]};
+			-6'sd11  : shift_num = {11'b0,num[4:0]};
+			-6'sd10  : shift_num = {10'b0,num[5:0]};
+			-6'sd9   : shift_num = {9'b0,num[6:0]};
+			-6'sd8   : shift_num = {8'b0,num[7:0]};
+			-6'sd7   : shift_num = {7'b0,num[8:0]};
+			-6'sd6   : shift_num = {6'b0,num[9:0]};
+			-6'sd5   : shift_num = {5'b0,num[10:0]};
+			-6'sd4   : shift_num = {4'b0,num[11:0]};
+			-6'sd4   : shift_num = {3'b0,num[12:0]};
+			-6'sd2   : shift_num = {2'b0,num[13:0]};
+			-6'sd1   : shift_num = {1'b0,num[14:0]};
+			6'sd0    : shift_num = num;
+			6'sd1    : shift_num = {num[15:1],1'b0};
+			6'sd2    : shift_num = {num[15:2],2'b0};
+			default : shift_num = {16'b0};
+		endcase
+	end
+endfunction
+
+reg signed [6:0] total_exponent;
+add_signed adder (
+	.A (fft_out_exp_reg),
+	.B (fft_in_exp_reg),
+	.sum (total_exponent)
+);
+
 // Always read from the output fifo
 always @(posedge aud_clk) begin
 	// The fifo is not empty
 	if (fifo_out_cnt >= 12'b0 && chan_req) begin
-		audio_output <= fifo_out_out >> 12;
+		audio_output <= shift_num(total_exponent, fifo_out_out);
 		// Acknowledge that we've read this data
 		fifo_out_rdreq <= 1'b1;
 	end else begin
@@ -169,6 +215,8 @@ always @(posedge fft_clk) begin
 		fifo_out_wrreq <= 1'b0;
 	end
 end
+
+// Logic for filling the output FFT
 
 reg [15:0] pos;
 reg [15:0] fill;
