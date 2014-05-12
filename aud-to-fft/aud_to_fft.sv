@@ -109,7 +109,7 @@ fft_module fft_out (
 	.source_eop (fft_out_soeop),
 	.source_valid (fft_out_sovalid),
 	.source_exp (fft_out_exp),
-	.inverse (1'b1)
+	.inverse (1'b0)
 );
 // End FFT
 
@@ -154,24 +154,24 @@ function [15:0] shift_num;
 	
 	begin
 		case (exponent)
-			-6'sd15  : shift_num = {15'b0,num[0]};
-			-6'sd14  : shift_num = {14'b0,num[1:0]};
-			-6'sd13  : shift_num = {13'b0,num[2:0]};
-			-6'sd12  : shift_num = {12'b0,num[3:0]};
-			-6'sd11  : shift_num = {11'b0,num[4:0]};
-			-6'sd10  : shift_num = {10'b0,num[5:0]};
-			-6'sd9   : shift_num = {9'b0,num[6:0]};
-			-6'sd8   : shift_num = {8'b0,num[7:0]};
-			-6'sd7   : shift_num = {7'b0,num[8:0]};
-			-6'sd6   : shift_num = {6'b0,num[9:0]};
-			-6'sd5   : shift_num = {5'b0,num[10:0]};
-			-6'sd4   : shift_num = {4'b0,num[11:0]};
-			-6'sd4   : shift_num = {3'b0,num[12:0]};
-			-6'sd2   : shift_num = {2'b0,num[13:0]};
-			-6'sd1   : shift_num = {1'b0,num[14:0]};
+			-6'sd15  : shift_num = {num[15],15'b0};
+			-6'sd14  : shift_num = {num[15:14],14'b0};
+			-6'sd13  : shift_num = {num[15:13],13'b0};
+			-6'sd12  : shift_num = {num[15:12],12'b0};
+			-6'sd11  : shift_num = {num[15:11],11'b0};
+			-6'sd10  : shift_num = {num[15:10],10'b0};
+			-6'sd9   : shift_num = {num[15:9],9'b0};
+			-6'sd8   : shift_num = {num[15:8],8'b0};
+			-6'sd7   : shift_num = {num[15:7],7'b0};
+			-6'sd6   : shift_num = {num[15:6],6'b0};
+			-6'sd5   : shift_num = {num[15:5],5'b0};
+			-6'sd4   : shift_num = {num[15:4],4'b0};
+			-6'sd4   : shift_num = {num[15:3],3'b0};
+			-6'sd2   : shift_num = {num[15:2],2'b0};
+			-6'sd1   : shift_num = {num[15:1],1'b0};
 			6'sd0    : shift_num = num;
-			6'sd1    : shift_num = {num[15:1],1'b0};
-			6'sd2    : shift_num = {num[15:2],2'b0};
+			6'sd1    : shift_num = {num[15],num[13:0], 1'b0};
+			6'sd2    : shift_num = {num[15],num[12:0], 2'b0};
 			default : shift_num = {16'b0};
 		endcase
 	end
