@@ -1,5 +1,5 @@
-#ifndef _EQUALIZER_H
-#define _EQUALIZER_H
+#ifndef _EQUALIZER_DRIVER_H
+#define _EQUALIZER_DRIVER_H
 
 #include <linux/ioctl.h>
 

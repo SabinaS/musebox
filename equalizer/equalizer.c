@@ -13,7 +13,7 @@
 #include <linux/slab.h> */
 #include "equalizer_driver.h"
 
-#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u8 *)
+#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, uint8_t *)
 
 #define DRIVER_NAME "equalizer_driver"
 #define SAMPLENUM 8
@@ -21,7 +21,7 @@
 
 int fp; 
 
-void write_db(u8* db_value, u8* addr)
+void write_db(uint8_t* db_value, uint8_t* addr)
 {
     if (ioctl(addr, EQUALIZER_DRIVER_WRITE_DIGIT, db_value) == -1)
         printf("EQUALIZER_DRIVER_WRITE_DIGIT failed: %s\n",
@@ -42,9 +42,9 @@ int main()
     printf("Please type in the decibal value you would like to change it to (-12 to 12):\n");
     scanf("%d",&db);
 
-    u8 addr, db_value; 
-    addr = (u8 *) ("4'd" + freq - 1); 
-    db_value = (u8 *) db; 
+    uint8_t addr, db_value; 
+    addr = (uint8_t *) ("4'd" + freq - 1); 
+    db_value = (uint8_t *) db; 
 
     write_db(db_value, addr); 
     
