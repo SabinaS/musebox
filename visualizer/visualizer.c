@@ -2,12 +2,10 @@
  * Creates frequency spectrum visualizer for different audio frequencies
  */ 
 
-//#include "fbputchar.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-//#include "usbkeyboard.h"
 #include <math.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -17,23 +15,34 @@
 #include "visualizer_driver.h"
 
 #define USER_SPACE_FFT
-
+#define VISUALIZER_MAGIC 4112
+#define VISUALIZER_WRITE_FREQ _IOW(VISUALIZER_MAGIC, 1, int *)
 
 #define SAMPLENUM 8192
 #define H25K 4096
+
 static int slot_values[12] = {31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
 static int bin_centers[12] = {6, 13, 28, 46, 82, 117, 186, 464, 929, 1486, 2601, 3715};
 static int slot_heights[12]; 
 static struct freq_slot slot_amps[12]; 
 static struct complex_num freq_data[SAMPLENUM];
 
+typedef struct {
+    int16_t real;
+    int16_t imag;
+} complex_num;
+typedef struct {
+    int addr;
+    int height; 
+} freq_slot;
+
 void read_samples()
 {
-    int fd = fopen("/dev/freq_spec", O_RDWR); //file descriptor? 
+    int fd = fopen("/dev/freq_spec", O_RDWR); 
     struct complex_num *freq_data;
-    freq_data = (complex_num*) malloc(SAMPLEBYTES); //allocating space for data array 
+    freq_data = (complex_num*) malloc(SAMPLENUM*2); 
     
-    if (ioctl(fd, VISUALIZER_DRIVER_READ_FFT, freq_data) == -1) //automatically updates freq_data? 
+    if (ioctl(fd, VISUALIZER_DRIVER_READ_FFT, freq_data) == -1) 
         printf("VISUALIZER_DRIVER_READ_FFT failed: %s\n",
             strerror(errno));
     else {
@@ -48,29 +57,27 @@ void read_samples()
 void write_samples(int* dataArray)
 {
     int fd = open("/dev/freq_spec", O_RDWR);    
-    if (ioctl(fd, VISUALIZER_DRIVER_WRITE_FREQ, dataArray) == -1)
-        printf("VISUALIZER_DRIVER_WRITE_FREQ failed: %s\n",
-            strerror(errno));
+    if (ioctl(fd, VISUALIZER_DRIVER_WRITE_FREQ, dataArray) == -1){
+        printf("VISUALIZER_DRIVER_WRITE_FREQ failed: %s\n", strerror(errno));
+    }
     else {
-        if (status & VISUALIZER_DRIVER_READ_FFT)
+        if (status){
             puts("VISUALIZER_DRIVER_WRITE_FREQ is not set");
-        else
+        }
+        else{
             puts("VISUALIZER_DRIVER_WRITE_FREQ is set");
+        }
     }
 }
 
-//read in from visualizer_driver audio frequncies 
-//register changes in frequencies
-//send changes to writedata to visualizer module (freq_spec.sv)
 
 int main()
 {
-    read_samples(); //update freq_data
+    read_samples(); 
     int i = 0; 
     int j = 0; 
     
-    //add the frequencies of each bin 
-    //get the amplitude by 20log_10(reals^2 + imags^2)
+   
     while(i= 1; i< 13; i++){
 	    double ampl_real = 0; 
 	    double ampl_imag = 0; 
@@ -93,7 +100,7 @@ int main()
 	    slot_amps[i] = amp;
     }
     
-    //place heights between 0 and 479
+    
     while(i=1; i < 13; i++){
 	int height;
 	height = 479 - ((slot_amps[i])/186)*479; 
@@ -101,7 +108,7 @@ int main()
 
     }
     
-    write_samples(slot_heights); //writing the 8k samples 
+    write_samples(slot_heights); 
     
     printf("Visualizer Userspace program terminating\n");
     return 0;
