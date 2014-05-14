@@ -77,18 +77,18 @@ static void readTransform(struct complex_num *dataArray)
  */
 static long fft_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    struct complex_num *dataArray = kmalloc(SAMPLENUM * sizeof(complex_num), GFP_KERNEL); //allocating space for data array
+    struct complex_num *dataArray = kmalloc(SAMPLENUM * sizeof(struct complex_num), GFP_KERNEL); //allocating space for data array
     
 	switch (cmd) {
 	case FFT_DRIVER_READ_TRANSFORM:
-		if (copy_from_user(dataArray, (complex_num *) arg,
-				   sizeof(complex_num) * SAMPLENUM + 1)) {
+		if (copy_from_user(dataArray, (struct complex_num *) arg,
+				   sizeof(struct complex_num) * SAMPLENUM + 1)) {
 			kfree(dataArray);
 			return -EACCES;
 		}
 		readTransform(dataArray); //read into dataArray
-		if (copy_to_user((complex_num *) arg, dataArray,
-				 sizeof(complex_num) * SAMPLENUM + 1)) {
+		if (copy_to_user((struct complex_num *) arg, dataArray,
+				 sizeof(struct complex_num) * SAMPLENUM + 1)) {
 			kfree(dataArray);
 			return -EACCES;
 		}
