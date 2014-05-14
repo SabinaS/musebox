@@ -2,7 +2,6 @@
 #define _VISUALIZER_DRIVER_H
 
 #include <linux/ioctl.h>
-#include "visualizer.h"
 
 #define VGA_LED_MAGIC 'q'
 

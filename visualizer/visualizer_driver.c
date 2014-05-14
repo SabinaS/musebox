@@ -73,7 +73,7 @@ static void read_fft_mem( u32* dataArray)
 static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
     u32 *dataArray = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
-    freq_bin bins[8192]; 
+    struct freq_bin bins[8192]; 
 
 	switch (cmd) {
 	case VISUALIZER_DRIVER_WRITE_FREQ:
