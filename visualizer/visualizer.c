@@ -15,6 +15,10 @@
 #include <sys/stat.h>
 
 #define USER_SPACE_FFT
+typedef struct {
+    int16_t real;
+    int16_t imag;
+} complex_num;
 #include "visualizer_driver.h"
 #include "fft_driver.h"
 

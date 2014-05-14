@@ -5,12 +5,7 @@
 
 #include <linux/ioctl.h>
 
-#ifdef USER_SPACE_FFT
-typedef struct {
-	int16_t real;
-	int16_t imag;
-} complex_num;
-#else
+#ifndef USER_SPACE_FFT
 typedef struct {
 	s16 real;
 	s16 imag;
