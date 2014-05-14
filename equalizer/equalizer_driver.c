@@ -29,6 +29,7 @@
 #include <linux/miscdevice.h>
 #include <linux/slab.h>
 #include <linux/io.h>
+#include <linux/io.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
@@ -51,11 +52,9 @@ struct equalizer_driver_dev {
 /*
  * read from array (user gives us) and write to memory address (0x0 to 0x65536)
  */
-static void write_mem( u8* db_value, send_info *send  )
+static void write_mem(send_info *send  )
 {	
-	u8 addr = send.addr; 
-	u8 db = send.db; 
-	iowrite16(addr, db , SAMPLENUM); //is __iomem compatable with u16	
+	iowrite16(send->db, dev.virtbase + send->addr); //is __iomem compatable with u16	
 }
 
 
@@ -63,16 +62,15 @@ static void write_mem( u8* db_value, send_info *send  )
  * Handle ioctl() calls from userspace:
  * Note extensive error checking of arguments
  */
-static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, send_info *send)
+static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    	u8 *db_value = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
+    	send_info send; 
     
 	switch (cmd) {
 	case EQUALIZER_DRIVER_WRITE_DIGIT:
-		if (copy_from_user(db_value, send,
-				   sizeof(u16)))
+		if (copy_from_user(&send, (send_info *) arg, sizeof(send_info)))
 			return -EACCES;
-		write_mem(db_value, send); //write dataArray
+		write_mem(&send); //write send
 		break;
 
 	default:
@@ -85,7 +83,7 @@ static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, send_info *
 /* The operations our device knows how to do */
 static const struct file_operations equalizer_fops = {
 	.owner		= THIS_MODULE,
-	.unlocked_ioctl = equalizer_ioctl,
+	.unlocked_ioctl = equalizer_driver_ioctl,
 
 };
 
