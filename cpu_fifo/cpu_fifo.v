@@ -59,7 +59,7 @@ module cpu_fifo (
 	output	[31:0]  q;
 	output	  rdempty;
 	output	  rdfull;
-	output	[12:0]  rdusedw;
+	output	[13:0]  rdusedw;
 	output	  wrempty;
 	output	  wrfull;
 `ifndef ALTERA_RESERVED_QIS
@@ -75,13 +75,13 @@ module cpu_fifo (
 	wire [31:0] sub_wire2;
 	wire  sub_wire3;
 	wire  sub_wire4;
-	wire [12:0] sub_wire5;
+	wire [13:0] sub_wire5;
 	wire  wrempty = sub_wire0;
 	wire  wrfull = sub_wire1;
 	wire [31:0] q = sub_wire2[31:0];
 	wire  rdempty = sub_wire3;
 	wire  rdfull = sub_wire4;
-	wire [12:0] rdusedw = sub_wire5[12:0];
+	wire [13:0] rdusedw = sub_wire5[13:0];
 
 	dcfifo	dcfifo_component (
 				.rdclk (rdclk),
@@ -99,11 +99,11 @@ module cpu_fifo (
 				.wrusedw ());
 	defparam
 		dcfifo_component.intended_device_family = "Cyclone V",
-		dcfifo_component.lpm_numwords = 8192,
+		dcfifo_component.lpm_numwords = 16384,
 		dcfifo_component.lpm_showahead = "ON",
 		dcfifo_component.lpm_type = "dcfifo",
 		dcfifo_component.lpm_width = 32,
-		dcfifo_component.lpm_widthu = 13,
+		dcfifo_component.lpm_widthu = 14,
 		dcfifo_component.overflow_checking = "ON",
 		dcfifo_component.rdsync_delaypipe = 4,
 		dcfifo_component.read_aclr_synch = "OFF",
@@ -124,7 +124,7 @@ endmodule
 // Retrieval info: PRIVATE: AlmostFullThr NUMERIC "-1"
 // Retrieval info: PRIVATE: CLOCKS_ARE_SYNCHRONIZED NUMERIC "0"
 // Retrieval info: PRIVATE: Clock NUMERIC "4"
-// Retrieval info: PRIVATE: Depth NUMERIC "8192"
+// Retrieval info: PRIVATE: Depth NUMERIC "16384"
 // Retrieval info: PRIVATE: Empty NUMERIC "1"
 // Retrieval info: PRIVATE: Full NUMERIC "1"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
@@ -152,11 +152,11 @@ endmodule
 // Retrieval info: PRIVATE: wsUsedW NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone V"
-// Retrieval info: CONSTANT: LPM_NUMWORDS NUMERIC "8192"
+// Retrieval info: CONSTANT: LPM_NUMWORDS NUMERIC "16384"
 // Retrieval info: CONSTANT: LPM_SHOWAHEAD STRING "ON"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "dcfifo"
 // Retrieval info: CONSTANT: LPM_WIDTH NUMERIC "32"
-// Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "13"
+// Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "14"
 // Retrieval info: CONSTANT: OVERFLOW_CHECKING STRING "ON"
 // Retrieval info: CONSTANT: RDSYNC_DELAYPIPE NUMERIC "4"
 // Retrieval info: CONSTANT: READ_ACLR_SYNCH STRING "OFF"
@@ -171,7 +171,7 @@ endmodule
 // Retrieval info: USED_PORT: rdempty 0 0 0 0 OUTPUT NODEFVAL "rdempty"
 // Retrieval info: USED_PORT: rdfull 0 0 0 0 OUTPUT NODEFVAL "rdfull"
 // Retrieval info: USED_PORT: rdreq 0 0 0 0 INPUT NODEFVAL "rdreq"
-// Retrieval info: USED_PORT: rdusedw 0 0 13 0 OUTPUT NODEFVAL "rdusedw[12..0]"
+// Retrieval info: USED_PORT: rdusedw 0 0 14 0 OUTPUT NODEFVAL "rdusedw[13..0]"
 // Retrieval info: USED_PORT: wrclk 0 0 0 0 INPUT NODEFVAL "wrclk"
 // Retrieval info: USED_PORT: wrempty 0 0 0 0 OUTPUT NODEFVAL "wrempty"
 // Retrieval info: USED_PORT: wrfull 0 0 0 0 OUTPUT NODEFVAL "wrfull"
@@ -185,7 +185,7 @@ endmodule
 // Retrieval info: CONNECT: q 0 0 32 0 @q 0 0 32 0
 // Retrieval info: CONNECT: rdempty 0 0 0 0 @rdempty 0 0 0 0
 // Retrieval info: CONNECT: rdfull 0 0 0 0 @rdfull 0 0 0 0
-// Retrieval info: CONNECT: rdusedw 0 0 13 0 @rdusedw 0 0 13 0
+// Retrieval info: CONNECT: rdusedw 0 0 14 0 @rdusedw 0 0 14 0
 // Retrieval info: CONNECT: wrempty 0 0 0 0 @wrempty 0 0 0 0
 // Retrieval info: CONNECT: wrfull 0 0 0 0 @wrfull 0 0 0 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL cpu_fifo.v TRUE

@@ -25,7 +25,7 @@ component cpu_fifo
 		q		: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		rdempty		: OUT STD_LOGIC ;
 		rdfull		: OUT STD_LOGIC ;
-		rdusedw		: OUT STD_LOGIC_VECTOR (12 DOWNTO 0);
+		rdusedw		: OUT STD_LOGIC_VECTOR (13 DOWNTO 0);
 		wrempty		: OUT STD_LOGIC ;
 		wrfull		: OUT STD_LOGIC 
 	);
