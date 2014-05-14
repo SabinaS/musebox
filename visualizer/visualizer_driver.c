@@ -20,7 +20,7 @@
  * checkpatch.pl --file --no-tree visualizer.c
  */
 
-/*#include <linux/module.h>
+#include <linux/module.h>
 #include <linux/init.h>
 #include <linux/errno.h>
 #include <linux/version.h>
@@ -32,7 +32,7 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h> */
+#include <linux/uaccess.h> 
 #include "visualizer_driver.h" 
 
 #define DRIVER_NAME "visualizer"
