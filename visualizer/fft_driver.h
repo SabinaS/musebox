@@ -5,10 +5,10 @@
 
 #include <linux/ioctl.h>
 
-typedef struct {
+struct complex_num {
 	s16 real;
 	s16 imag;
-} complex_num;
+};
 
 #define FFT_DRIVER_MAGIC 8417
 
