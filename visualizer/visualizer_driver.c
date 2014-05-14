@@ -51,7 +51,7 @@ struct visualizer_driver_dev {
  */
 static void write_freq_mem(freq_slot *slot)
 {	
-	iowrite16(slot.height, dev.virtbase + slot.addr); 	
+	iowrite16(slot->height, dev.virtbase + slot->addr); 	
 }
 
 
@@ -64,10 +64,10 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
     struct freq_slot bin; 
 
 	switch (cmd) {
-	case VISUALIZER_DRIVER_WRITE_FREQ:
-		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
+	case VISUALIZER_WRITE_FREQ:
+		if (copy_from_user(&bin, (freq_slot *) arg, sizeof(freq_slot)))
 			return -EACCES;
-		write_freq_mem(dataArray); //write dataArray
+		write_freq_mem(&bin); //write dataArray
 		break;
 
 	default:
