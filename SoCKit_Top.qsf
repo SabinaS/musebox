@@ -4716,8 +4716,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE audio/i2c_av_config.sv
 set_global_assignment -name SYSTEMVERILOG_FILE audio/audio_effect.sv
 set_global_assignment -name SYSTEMVERILOG_FILE audio/audio_codec.sv
 set_global_assignment -name VERILOG_FILE qsys/synthesis/lab3.v -library lab3
-set_global_assignment -name SYSTEMVERILOG_FILE qsys/synthesis/submodules/freq_spec.sv
-set_global_assignment -name SYSTEMVERILOG_FILE qsys/synthesis/submodules/freq_spec_slave.sv
 set_global_assignment -name QIP_FILE qsys/synthesis/lab3.qip
 set_global_assignment -name VERILOG_FILE SoCKit_top.v
 set_global_assignment -name QIP_FILE audio_clk/clock_pll.qip
@@ -4736,5 +4734,8 @@ set_global_assignment -name SYSTEMVERILOG_FILE freq_spec/freq_spec_slave.sv
 set_global_assignment -name SYSTEMVERILOG_FILE freq_spec/freq_spec.sv
 set_global_assignment -name QIP_FILE cpu_fifo/cpu_fifo.qip
 set_global_assignment -name VERILOG_FILE cpu_fifo/cpu_fifo.v
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE overlapadd/fft_dcfifo.qip
+set_global_assignment -name QIP_FILE windowfunction/window.qip
+set_global_assignment -name VERILOG_FILE windowfunction/window.v
 set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

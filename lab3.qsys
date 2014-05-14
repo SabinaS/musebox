@@ -48,7 +48,7 @@
    {
       datum baseAddress
       {
-         value = "48";
+         value = "32";
          type = "String";
       }
    }
@@ -137,8 +137,16 @@
    internal="freq_spec_0.conduit_end"
    type="conduit"
    dir="end" />
- <interface name="vga_debug" internal="aud_to_fft_0.conduit_end" />
- <interface name="audio" internal="aud_to_fft_0.conduit_end_1" />
+ <interface
+   name="vga_debug"
+   internal="aud_to_fft_0.conduit_end"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="audio"
+   internal="aud_to_fft_0.conduit_end_1"
+   type="conduit"
+   dir="end" />
  <interface name="equal" internal="equalizer_0.conduit_end" />
  <module kind="clock_source" version="13.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
@@ -625,7 +633,7 @@
  <module kind="freq_spec" version="1.0" enabled="1" name="freq_spec_0">
   <parameter name="AUTO_CLOCK_CLOCK_RATE" value="50000000" />
  </module>
- <module kind="aud_to_fft" version="1.0" enabled="0" name="aud_to_fft_0">
+ <module kind="aud_to_fft" version="1.0" enabled="1" name="aud_to_fft_0">
   <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
  </module>
  <module kind="equalizer" version="1.0" enabled="0" name="equalizer_0">
@@ -680,7 +688,7 @@
    start="hps_0.h2f_lw_axi_master"
    end="aud_to_fft_0.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0030" />
+  <parameter name="baseAddress" value="0x0020" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -689,25 +697,7 @@
    start="master_0.master"
    end="aud_to_fft_0.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0030" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.1"
-   start="hps_0.h2f_lw_axi_master"
-   end="freq_spec_0.avalon_slave_0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.1"
-   start="master_0.master"
-   end="freq_spec_0.avalon_slave_0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="baseAddress" value="0x0020" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -738,6 +728,24 @@
    version="13.1"
    start="clk_0.clk_reset"
    end="equalizer_0.reset_sink" />
+ <connection
+   kind="avalon"
+   version="13.1"
+   start="hps_0.h2f_lw_axi_master"
+   end="freq_spec_0.avalon_slave_0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.1"
+   start="master_0.master"
+   end="freq_spec_0.avalon_slave_0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="false" />

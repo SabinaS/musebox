@@ -614,6 +614,7 @@ i2c_av_config av_config (
 
 assign AUD_XCK = audio_clk;
 assign AUD_MUTE = (SW != 4'b0);
+wire [15:0] audio_out_right = (SW[1] ? audio_output_l : audio_output_r);
 
 audio_codec ac (
     .clk (audio_clk),
@@ -621,7 +622,7 @@ audio_codec ac (
     .sample_end (sample_end),
     .sample_req (sample_req),
     .audio_output_l (audio_output_l),
-    .audio_output_r (audio_output_r),
+    .audio_output_r (audio_out_right),
     .audio_input_l (audio_input_l),
     .audio_input_r (audio_input_r),
     .channel_sel (2'b10),
@@ -645,19 +646,15 @@ audio_codec ac (
 //    .control (SW)
 //);
 // Audio Declarations
-audio_to_fft atf_right (
-	.aud_clk (audio_clk),
-	.reset (reset),
-	.fft_clk (OSC_50_B4A),
-	.chan_req (sample_req[0]),
-	.chan_end (sample_end[0]),
-	.audio_input (audio_input_r),
-	.audio_output (audio_output_r),
-	.vga_dat (vga_dat),
-	.vga_dowrite (vga_dowrite),
-	.vga_select (vga_select),
-	.vga_addr (vga_addr)
-);
+//audio_to_fft atf_right (
+//	.aud_clk (audio_clk),
+//	.reset (reset),
+//	.fft_clk (OSC_50_B4A),
+//	.chan_req (sample_req[0]),
+//	.chan_end (sample_end[0]),
+//	.audio_input (audio_input_r),
+//	.audio_output (audio_output_r)
+//);
 //audio_to_fft atf_left (
 //	.aud_clk (audio_clk),
 //	.reset (reset),
@@ -666,6 +663,10 @@ audio_to_fft atf_right (
 //	.chan_end (sample_end[1]),
 //	.audio_input (audio_input_l),
 //	.audio_output (audio_output_l)
+//	.vga_dat (vga_dat),
+//	.vga_dowrite (vga_dowrite),
+//	.vga_select (vga_select),
+//	.vga_addr (vga_addr)
 //);
 
    lab3 u0 (
@@ -744,11 +745,14 @@ audio_to_fft atf_right (
 				.vga_HS (VGA_HS),
 				.vga_VS (VGA_VS),
 				.vga_BLANK_n (VGA_BLANK_n),
-				.vga_SYNC_n (VGA_SYNC_n),
-				.vga_mem_writedata (vga_dat),
-				.vga_mem_write (vga_dowrite),
-				.vga_mem_chipselect (vga_select),
-				.vga_mem_address (vga_addr)
+				.vga_SYNC_n (VGA_SYNC_n),                  //          .addr
+		      .audio_aud_clk (audio_clk),                   //     audio.aud_clk
+				.audio_fft_clk (OSC_50_B4A),                   //          .fft_clk
+				.audio_chan_req(sample_req[1]),                  //          .chan_req
+				.audio_chan_end(sample_end[1]),                  //          .chan_end
+				.audio_audio_input(audio_input_l),               //          .audio_input
+				.audio_audio_output(audio_output_l),              //          .audio_output
+				.audio_reset(reset)                      //          .reset
 	    );
 
 endmodule

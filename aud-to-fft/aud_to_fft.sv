@@ -7,7 +7,7 @@ module add_signed (
 	output signed [6:0] sum
 );
 
-assign sum = A + B + 6'sd13;
+assign sum = {A[5],A} + {B[5],B} + 7'sd10;
 
 endmodule
 
@@ -15,6 +15,7 @@ module audio_to_fft (
    input  aud_clk,
 	input  fft_clk,
 	input  system_clk,
+	input  system_reset,
 	input  reset,
 	// If true, then we should read the data for our fft
 	input  chan_req,
@@ -26,7 +27,7 @@ module audio_to_fft (
 	output vga_select,
 	output [1:0] vga_addr,
 	output [31:0] readdata,
-	input  [1:0] address,
+	input  address,
 	input  chipselect,
 	input  read
 );
@@ -364,18 +365,22 @@ end
 reg cpu_queue_empty_last_read = 1'b0;
 
 always_ff @(posedge system_clk) begin
-	if (reset) begin
+	if (system_reset) begin
 		// I'll figure out what to do later
 	end else if (chipselect && read) begin
 		case (address)
-			2'd0 : begin
+			1'd0 : begin
 				// Check to see if the queue is empty
 				cpu_queue_empty_last_read <= cpu_is_empty;
 				readdata <= cpu_q;
 				cpu_rdreq <= 1'b1;
 			end
-			2'd1 : begin
-				readdata <= {31'b0, cpu_queue_empty_last_read};
+			1'd1 : begin
+				if (cpu_queue_empty_last_read) begin
+					readdata <= {total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent, 15'b0, cpu_queue_empty_last_read};
+				end else begin
+					readdata <= {31'b0, cpu_queue_empty_last_read};
+				end
 				cpu_rdreq <= 1'b0;
 			end
 			default : cpu_rdreq <= 1'b0;
