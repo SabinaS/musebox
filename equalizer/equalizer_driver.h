@@ -8,7 +8,7 @@ typedef struct{
 	uint8_t db; 
 }send_info; 
 
-#define VGA_LED_MAGIC 'q'
+#define EQUALIZER_MAGIC 'q'
 
 /* ioctls and their arguments */
 #define EQUALIZER_DRIVER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u8 *)
