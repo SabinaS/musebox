@@ -53,7 +53,7 @@ struct visualizer_driver_dev {
  */
 static void write_freq_mem( s16* dataArray )
 {	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); 	
+	iowrite16(SAMPLEBYTEs+dev.virtbase, dataArray , SAMPLENUM); 	
 }
 
 //first, read from freq_spec in 32bit integer: first 16bits real, next 16bits imaginary 
