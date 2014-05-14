@@ -61,13 +61,13 @@ static void write_mem( u8* db_value )
  * Handle ioctl() calls from userspace:
  * Note extensive error checking of arguments
  */
-static long equalizer_driver_ioctl(u8 * addr, unsigned int cmd, unsigned long arg)
+static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
     u8 *db_value = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
     
 	switch (cmd) {
 	case EQUALIZER_DRIVER_WRITE_DIGIT:
-		if (copy_from_user(dataArray, (u8 *) arg,
+		if (copy_from_user(db_value, (u8 *) arg,
 				   sizeof(u16)))
 			return -EACCES;
 		write_mem(db_value); //write dataArray
