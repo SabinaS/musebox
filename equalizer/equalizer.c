@@ -47,6 +47,7 @@ int main()
     db_value = (int) db; 
     
     struct send_info sendi;
+    sendi = (send_info *) malloc(SAMPLEBYTES);
     sendi.addr = addr; 
     sendi.db = db_value; 
 
