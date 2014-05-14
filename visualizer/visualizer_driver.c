@@ -20,7 +20,7 @@
  * checkpatch.pl --file --no-tree visualizer.c
  */
 
-#include <linux/module.h>
+/*#include <linux/module.h>
 #include <linux/init.h>
 #include <linux/errno.h>
 #include <linux/version.h>
@@ -32,8 +32,8 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h>
-#include "visualizer_driver.h"
+#include <linux/uaccess.h> */
+#include "visualizer_driver.h" 
 
 #define DRIVER_NAME "visualizer"
 #define SAMPLENUM 8192
@@ -77,15 +77,13 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 
 	switch (cmd) {
 	case VISUALIZER_DRIVER_WRITE_FREQ:
-		if (copy_from_user(dataArray, (u32 *) arg,
-				   sizeof(u32)))
+		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
 			return -EACCES;
 		write_freq_mem(dataArray); //write dataArray
 		break;
 
 	case VISUALIZER_DRIVER_READ_FFT:
-		if (copy_from_user(dataArray, (u32*) arg,
-				   sizeof(u32)))
+		if (copy_from_user(dataArray, (u32*) arg, sizeof(u32)))
 			return -EACCES;
 		int i=0;
 		while(i <= 8195){
@@ -97,11 +95,10 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 			s16 *boolean = (s16 *) &read_fft_mem(dataArray+4);
 			if((int)boolean[1] = 0){ //second s16 part of boolean contains valid bit
 				bins[i] = bin; 
-				i++
+				i++; 
 			} 
 		}
-		if (copy_to_user((s16 *) arg, bins,
-				 sizeof(u32)))
+		if (copy_to_user((s16 *) arg, bins, sizeof(u32)))
 			return -EACCES;
 		break;
 
