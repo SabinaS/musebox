@@ -81,7 +81,7 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 		break;
 
 	case VISUALIZER_DRIVER_READ_FFT:
-		if (copy_from_user(dataArray, (u32*) arg, sizeof(u32)))
+		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
 			return -EACCES;
 		int i=0;
 		while(i <= 8195){
