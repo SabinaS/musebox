@@ -49,9 +49,14 @@ struct cpu_audio_dev {
 /*
  * write slot_heights[12] to freq_spec.vs 
  */
-static void write_freq_mem(freq_slot *slot)
+static void read_audio_bank(sample_t *samples)
 {	
-	iowrite16(slot->height, dev.virtbase + slot->addr); 	
+	*((unsigned int *) samples) = ioread32(dev.virtbase); 	
+}
+
+static void write_audio_bank(sample_t *samples)
+{
+	iowrite32(samples, dev.virtbase);
 }
 
 
