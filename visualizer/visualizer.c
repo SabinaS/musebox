@@ -60,18 +60,9 @@ void write_samples(int* dataArray)
 
 int main()
 {
-    read_samples(); 
+    read_samples(); //update freq_data
     int i = 0; 
     int j = 0; 
-    
-    //read in the values and get real and imaginary parts
-    while(i != 8192){
-        struct freq_bin fn; 
-        int fn.real = read_samples().real;
-        int fn.imag = read_samples().imag;
-        freq_data[i] = fn; 
-        i++; 
-    }
     
     //add the frequencies of each bin 
     //get the amplitude by 20log_10(reals^2 + imags^2)
