@@ -70,7 +70,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 
 	switch (cmd) {
 	case CPU_AUDIO_READ_SAMPLES:
-		if (copy_from_user(samples, (sample_t *) arg, sizeof(sample_t)))
+		if (copy_from_user(samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
 			return -EACCES;
 		read_audio_bank(samples); //write dataArray
 		if (copy_to_user((sample_t *) arg, samples,
@@ -79,7 +79,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 		break;
 
 	case CPU_AUDIO_WRITE_SAMPLES:
-		if (copy_from_user(&samples, (sample_t *) arg, sizeof(sample_t)))
+		if (copy_from_user(&samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
 			return -EACCES;
 		write_audio_bank(samples); //write dataArray
 		break;
