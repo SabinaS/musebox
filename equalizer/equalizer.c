@@ -13,7 +13,7 @@
 #include <linux/slab.h> */
 #include "equalizer_driver.h"
 
-#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, uint8_t *)
+#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u32 *)
 
 #define DRIVER_NAME "equalizer_driver"
 #define SAMPLENUM 8
