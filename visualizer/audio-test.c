@@ -17,7 +17,7 @@
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
 
-#define SAMPLENUM 8192
+#define SAMPLENUM 32768
 #define H25K 4096
 
 int main()
