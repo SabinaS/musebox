@@ -22,7 +22,7 @@
 
 int main()
 {
-    char *file = "/dev/musebox";
+    char *file = "/dev/cpu_audio";
     int box_fd;
 
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
