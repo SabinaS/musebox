@@ -29,7 +29,6 @@
 #include <linux/miscdevice.h>
 #include <linux/slab.h>
 #include <linux/io.h>
-#include <linux/io.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
