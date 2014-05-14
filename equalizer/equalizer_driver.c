@@ -46,7 +46,6 @@
 struct equalizer_driver_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
-	u8 db_value; 
 } dev;
 
 /*
