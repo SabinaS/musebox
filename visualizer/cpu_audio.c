@@ -67,7 +67,10 @@ static void write_audio_bank(sample_t *samples)
 static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
     sample_t *samples = (sample_t *) kmalloc(SAMPLENUM * sizeof(sample_t), GFP_KERNEL); 
-
+    if (samples == NULL) {
+    	printk("samples is null\n");
+    	return -ENOMEM;
+    }
 	switch (cmd) {
 	case CPU_AUDIO_READ_SAMPLES:
 		if (copy_from_user(samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
