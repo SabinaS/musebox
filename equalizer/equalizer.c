@@ -19,7 +19,6 @@
 #define SAMPLENUM 8
 #define SAMPLEBYTES SAMPLENUM*2
 
-int fp; 
 
 void write_db(send_info* send)
 {
