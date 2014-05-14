@@ -6,6 +6,10 @@
 #define VISUALIZER_MAGIC 4112
 
 typedef struct {
+    int16_t real;
+    int16_t imag;
+} complex_num;
+typedef struct {
     int addr;
     int height; 
 } freq_slot;
