@@ -1,28 +1,28 @@
-/* Creates frequency spectrum visualizer for different audio frequencies
+/* 
+ * Creates frequency spectrum visualizer for different audio frequencies
  */ 
 
 //#include "fbputchar.h"
-#include <linux/stdio.h>
-#include <linux/stdlib.h>
-#include <linux/string.h>
-#include <linux/sys/socket.h>
-#include <linux/arpa/inet.h>
-#include <linux/unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 //#include "usbkeyboard.h"
-#include <linux/pthread.h>
-#include <linux/math.h>
-#include <linux/fs.h> //http://www.makelinux.net/ldd3/chp-3-sect-3
+#include <math.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#define USER_SPACE
 #include "visualizer_driver.h"
+#include "fft_driver.h"
 
-#define slot_values[] = {0, 31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
-#define slot_amps[12]; 
-#define slot_heights[12]; 
 #define SAMPLENUM 8192
-#define SAMPLEBYTES SAMPLENUM*2
-#define struct freq_bin freq_data[8192]; 
-
-#define VISUALIZER_WRITE_FREQ _IOW(VISUALIZER_MAGIC, 1, u32 *) //writes to freq_spec.sv 
-#define VISUALIZER_READ_FFT  _IOWR(VISUALIZER_MAGIC, 2, u32 *) //reads from aud_to_fft
+#define H25K 4096
+static int slot_values[12] = {31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
+static int bin_centers[12] = {6, 13, 28, 46, 82, 117, 186, 464, 929, 1486, 2601, 3715};
+static struct complex_num freq_data[SAMPLENUM];
 
 void read_samples()
 {
