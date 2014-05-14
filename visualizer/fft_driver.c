@@ -49,8 +49,8 @@ struct fft_driver_dev {
 static void readTransform(complex_num *dataArray)
 {
 	int amountRead = 0;
-	s16 *cnum = kmalloc(2 * sizeof(complex_num), GFP_KERNEL);
-	s16 *ack = kmalloc(2 * sizeof(complex_num), GFP_KERNEL);
+	s16 *cnum = kmalloc(2 * sizeof(s16), GFP_KERNEL);
+	s16 *ack = kmalloc(2 * sizeof(s16), GFP_KERNEL);
 	// Keep reading while we haven't retrieved all values
 	while (amountRead <= SAMPLENUM) {
     	*((unsigned int *) cnum) = ioread32(dev.virtbase);
@@ -74,7 +74,7 @@ static void readTransform(complex_num *dataArray)
  */
 static long fft_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    complex_num *dataArray = kmalloc(SAMPLENUM * sizeof(complex_num), GFP_KERNEL); //allocating space for data array
+    struct complex_num *dataArray = kmalloc(SAMPLENUM * sizeof(complex_num), GFP_KERNEL); //allocating space for data array
     
 	switch (cmd) {
 	case FFT_DRIVER_READ_TRANSFORM:

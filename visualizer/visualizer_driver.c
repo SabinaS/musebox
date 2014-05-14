@@ -37,7 +37,6 @@
 
 #define DRIVER_NAME "visualizer"
 #define SAMPLENUM 8192
-#define SAMPLEBYTES SAMPLENUM*2
 
 /*
  * Information about our device
@@ -45,22 +44,14 @@
 struct visualizer_driver_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
-	u32 dataArray, boolean; 
 } dev;
 
 /*
  * write slot_heights[12] to freq_spec.vs 
  */
-static void write_freq_mem( s16* dataArray )
+static void write_freq_mem(freq_slot *slot)
 {	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dataArray , SAMPLENUM); 	
-}
-
-//first, read from freq_spec in 32bit integer: first 16bits real, next 16bits imaginary 
-//then read in next 32bit which is one or zero whether the data is valid
-static void read_fft_mem( u32* dataArray)
-{
-    	ioread32( dev.virtbase, dataArray, SAMPLENUM*4);
+	iowrite16(slot.height, dev.virtbase + slot.addr); 	
 }
 
 
@@ -70,34 +61,13 @@ static void read_fft_mem( u32* dataArray)
  */
 static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    u32 *dataArray = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
-    struct freq_bin bins[8192]; 
+    struct freq_slot bin; 
 
 	switch (cmd) {
 	case VISUALIZER_DRIVER_WRITE_FREQ:
 		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
 			return -EACCES;
 		write_freq_mem(dataArray); //write dataArray
-		break;
-
-	case VISUALIZER_DRIVER_READ_FFT:
-		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
-			return -EACCES;
-		int i=0;
-		while(i <= 8195){
-			freq_bin bin;
-			s16 *data = (s16 *) &read_fft_mem(dataArray); 
-			bin.real = data[0];
-			bin.imag = data[1];
-			bins[i] = bin; 
-			s16 *boolean = (s16 *) &read_fft_mem(dataArray+4);
-			if((int)boolean[1] = 0){ //second s16 part of boolean contains valid bit
-				bins[i] = bin; 
-				i++; 
-			} 
-		}
-		if (copy_to_user((s16 *) arg, bins, sizeof(u32)))
-			return -EACCES;
 		break;
 
 	default:
@@ -175,7 +145,7 @@ static int visualizer_remove(struct platform_device *pdev)
 /* Which "compatible" string(s) to search for in the Device Tree */
 #ifdef CONFIG_OF
 static const struct of_device_id visualizer_of_match[] = {
-	{ .compatible = "altr,visualizer" },
+	{ .compatible = "altr,frec_spec" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, visualizer_of_match);
