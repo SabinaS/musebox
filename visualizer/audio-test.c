@@ -48,6 +48,8 @@ int main()
         close(box_fd);
         return -1;
     }
+    // Print out the values
+    printf("left: %u, right %u\n", (uint16_t) samples[0].left, (uint16_t) samples[0].right);
     //     usleep(1/60.0 * 100000);
     //     if (height == 479)
     //         dir = 0;
