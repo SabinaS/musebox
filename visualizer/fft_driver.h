@@ -5,7 +5,7 @@
 
 #include <linux/ioctl.h>
 
-#ifdef USER_SPACE
+#ifdef USER_SPACE_FFT
 typedef struct {
 	int16_t real;
 	int16_t imag;

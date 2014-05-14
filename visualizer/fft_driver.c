@@ -57,10 +57,13 @@ static void readTransform(complex_num *dataArray)
     	*((unsigned int *) ack) = ioread32(dev.virtbase + 4);
     	// If the data was good
     	if (ack[1]) {
-    		if (amountRead != SAMPLENUM)
-    			dataArray[amountRead] = {cnum[0], cnum[1]};
-    		else
-    			dataArray[amountRead] = {ack[0], ack[1]};
+    		if (amountRead != SAMPLENUM) {
+    			dataArray[amountRead].real = cnum[0];
+    			dataArray[amountRead].imag = cnum[1];
+    		} else {
+    			dataArray[amountRead].real = ack[0];
+    			dataArray[amountRead].imag = ack[1];
+    		}
     		amountRead++;
     	}
     }

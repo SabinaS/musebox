@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define USER_SPACE
+#define USER_SPACE_FFT
 #include "visualizer_driver.h"
 #include "fft_driver.h"
 
