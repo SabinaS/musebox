@@ -1,16 +1,15 @@
 //takes in 8k samples from fft_driver, equalizes them, passes them back to fft_driver
 
-#include <linux/stdio.h>
-#include <linux/unistd.h>
-#include <linux/stdint.h>
-#include <linux/sys/ioctl.h>
-#include <linux/sys/types.h>
-#include <linux/sys/stat.h>
-#include <linux/fcntl.h>
-#include <linux/string.h>
-#include <linux/time.h>
-#include <linux/stdlib.h>
-#include <linux/slab.h> 
+#include <stdio.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "equalizer_driver.h"
 
 #define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u32 *)
