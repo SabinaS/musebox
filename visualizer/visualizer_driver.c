@@ -80,8 +80,7 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 /* The operations our device knows how to do */
 static const struct file_operations visualizer_fops = {
 	.owner		= THIS_MODULE,
-	.unlocked_ioctl = visualizer_ioctl,
-
+	.unlocked_ioctl = visualizer_driver_ioctl,
 };
 
 /* Information about our device for the "misc" framework -- like a char dev */

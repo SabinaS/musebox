@@ -46,7 +46,7 @@ struct fft_driver_dev {
 } dev;
 
 // Read the whole transform length from the fft
-static void readTransform(complex_num *dataArray)
+static void readTransform(struct complex_num *dataArray)
 {
 	int amountRead = 0;
 	s16 *cnum = kmalloc(2 * sizeof(s16), GFP_KERNEL);
