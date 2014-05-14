@@ -4,13 +4,13 @@
 #include <linux/ioctl.h>
 
 typedef struct{
-	uint8_t addr;
-	uint8_t db; 
+	int addr;
+	int db; 
 }send_info; 
 
 #define EQUALIZER_MAGIC 'q'
 
 /* ioctls and their arguments */
-#define EQUALIZER_DRIVER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u8 *)
+#define EQUALIZER_DRIVER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u32 *)
 
 #endif
