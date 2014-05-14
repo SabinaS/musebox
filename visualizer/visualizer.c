@@ -19,8 +19,10 @@ typedef struct {
     int16_t real;
     int16_t imag;
 } complex_num;
-#include "visualizer_driver.h"
-#include "fft_driver.h"
+typedef struct {
+    int addr;
+    int height; 
+} freq_slot;
 
 #define SAMPLENUM 8192
 #define H25K 4096

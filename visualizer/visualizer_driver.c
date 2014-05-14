@@ -61,7 +61,7 @@ static void write_freq_mem(freq_slot *slot)
  */
 static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    struct freq_slot bin; 
+    freq_slot bin; 
 
 	switch (cmd) {
 	case VISUALIZER_WRITE_FREQ:

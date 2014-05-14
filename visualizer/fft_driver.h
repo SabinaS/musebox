@@ -5,12 +5,10 @@
 
 #include <linux/ioctl.h>
 
-#ifndef USER_SPACE_FFT
 typedef struct {
 	s16 real;
 	s16 imag;
 } complex_num;
-#endif
 
 #define FFT_DRIVER_MAGIC 8417
 
