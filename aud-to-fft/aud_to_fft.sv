@@ -402,6 +402,7 @@ always_ff @(posedge system_clk) begin
 			1'd0 : begin
 				// In the first address, tell them our size and exponent
 				readdata <= {total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent, cpu_cnt};
+				cpu_rdreq <= 1'b0;
 			end
 			1'd1 : begin
 				// In the second address, unconditionally give them the data

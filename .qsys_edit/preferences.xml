@@ -15,6 +15,6 @@
   </columns>
  </clocktable>
  <window width="1100" height="800" x="0" y="25" />
- <library expandedCategories="Project,Library" />
+ <library expandedCategories="Library,Project" />
  <generation path="qsys" />
 </preferences>
