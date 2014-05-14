@@ -36,8 +36,6 @@
 #include "fft_driver.h"
 
 #define DRIVER_NAME "fft_driver"
-#define SAMPLENUM 8192
-#define SAMPLEBYTES SAMPLENUM*2
 
 /*
  * Information about our device
@@ -45,22 +43,29 @@
 struct fft_driver_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
-	u16 x; 
 } dev;
 
-/*
- * read from array (user gives us) and write to memory address (0x0 to 0x65536)
- */
-static void write_mem( u16* dataArray )
-{	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); //is __iomem compatable with u16
-	
-}
-//read from memory address (fpga gives us 0x0 to 0x65536) and write to array
-static void read_mem( u16* dataArray)
+// Read the whole transform length from the fft
+static void readTransform(complex_num *dataArray)
 {
-    ioread16( dev.virtbase, dataArray, SAMPLENUM);
-      
+	int amountRead = 0;
+	s16 *cnum = kmalloc(2 * sizeof(complex_num), GFP_KERNEL);
+	s16 *ack = kmalloc(2 * sizeof(complex_num), GFP_KERNEL);
+	// Keep reading while we haven't retrieved all values
+	while (amountRead <= SAMPLENUM) {
+    	*((unsigned int *) cnum) = ioread32(dev.virtbase);
+    	*((unsigned int *) ack) = ioread32(dev.virtbase + 4);
+    	// If the data was good
+    	if (ack[1]) {
+    		if (amountRead != SAMPLENUM)
+    			dataArray[amountRead] = {cnum[0], cnum[1]};
+    		else
+    			dataArray[amountRead] = {ack[0], ack[1]};
+    		amountRead++;
+    	}
+    }
+    kfree(cnum);
+    kfree(ack);
 }
 
 /*
@@ -69,30 +74,29 @@ static void read_mem( u16* dataArray)
  */
 static long fft_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    u16 *dataArray = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
+    complex_num *dataArray = kmalloc(SAMPLENUM * sizeof(complex_num), GFP_KERNEL); //allocating space for data array
     
 	switch (cmd) {
-	case FFT_DRIVER_WRITE_DIGIT:
-		if (copy_from_user(dataArray, (u16 *) arg,
-				   sizeof(u16)))
+	case FFT_DRIVER_READ_TRANSFORM:
+		if (copy_from_user(dataArray, (complex_num *) arg,
+				   sizeof(complex_num) * SAMPLENUM + 1)) {
+			kfree(dataArray);
 			return -EACCES;
-		write_mem(dataArray); //write dataArray
-		break;
-
-	case FFT_DRIVER_READ_DIGIT:
-		if (copy_from_user(dataArray, (u16*) arg,
-				   sizeof(u16)))
+		}
+		readTransform(dataArray); //read into dataArray
+		if (copy_to_user((complex_num *) arg, dataArray,
+				 sizeof(complex_num) * SAMPLENUM + 1)) {
+			kfree(dataArray);
 			return -EACCES;
-		read_mem(dataArray); //read from dataArray
-		if (copy_to_user((u16 *) arg, dataArray,
-				 sizeof(u16)))
-			return -EACCES;
+		}
 		break;
 
 	default:
+		kfree(dataArray);
 		return -EINVAL;
 	}
 
+	kfree(dataArray);
 	return 0;
 }
 
@@ -100,7 +104,6 @@ static long fft_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg
 static const struct file_operations fft_driver_fops = {
 	.owner		= THIS_MODULE,
 	.unlocked_ioctl = fft_driver_ioctl,
-
 };
 
 /* Information about our device for the "misc" framework -- like a char dev */
@@ -164,7 +167,7 @@ static int fft_driver_remove(struct platform_device *pdev)
 /* Which "compatible" string(s) to search for in the Device Tree */
 #ifdef CONFIG_OF
 static const struct of_device_id fft_driver_of_match[] = {
-	{ .compatible = "altr,fft_driver" },
+	{ .compatible = "altr,aud_to_fft" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, fft_driver_of_match);
@@ -199,5 +202,5 @@ module_exit(fft_driver_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("MA2799, SS3912");
-MODULE_DESCRIPTION("FFT_DRIVER");
+MODULE_DESCRIPTION("FFT Driver for MuseBox");
 
