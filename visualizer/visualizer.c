@@ -2,17 +2,17 @@
  */ 
 
 //#include "fbputchar.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+#include <linux/stdio.h>
+#include <linux/stdlib.h>
+#include <linux/string.h>
+#include <linux/sys/socket.h>
+#include <linux/arpa/inet.h>
+#include <linux/unistd.h>
 //#include "usbkeyboard.h"
-#include <pthread.h>
+#include <linux/pthread.h>
 //#include <linux/slab.h> //need for kmalloc?
-#include <math.h>
-#include <fs.h> //http://www.makelinux.net/ldd3/chp-3-sect-3
+#include <linux/math.h>
+#include <linux/fs.h> //http://www.makelinux.net/ldd3/chp-3-sect-3
 #include "visualizer_driver.h"
 
 #define slot_values = {0, 31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
@@ -22,6 +22,8 @@
 #define SAMPLEBYTES SAMPLENUM*2
 #define struct freq_bin freq_data[8192]; 
 
+#define VISUALIZER_WRITE_FREQ _IOW(VISUALIZER_MAGIC, 1, u32 *) //writes to freq_spec.sv 
+#define VISUALIZER_READ_FFT  _IOWR(VISUALIZER_MAGIC, 2, u32 *) //reads from aud_to_fft
 
 void read_samples()
 {

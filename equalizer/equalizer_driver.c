@@ -32,7 +32,7 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h>
+#include <linux/uaccess.h> 
 #include "equalizer_driver.h"
 
 #define DRIVER_NAME "equalizer"
