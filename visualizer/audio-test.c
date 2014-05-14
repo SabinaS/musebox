@@ -30,6 +30,7 @@ int main()
         return -1;
     }
 
+    sample_t samples[SAMPLENUM];
     // int bar = 0;
     // int height = 240;
     // int dir = 0;
@@ -42,11 +43,11 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    //     if (ioctl(frec_spec_fd, VISUALIZER_WRITE_FREQ, &slot)) {
-    //         perror("ioctl write failed!");
-    //         close(frec_spec_fd);
-    //         return -1;
-    //     }
+    if (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, &samples)) {
+        perror("ioctl write failed!");
+        close(box_fd);
+        return -1;
+    }
     //     usleep(1/60.0 * 100000);
     //     if (height == 479)
     //         dir = 0;
