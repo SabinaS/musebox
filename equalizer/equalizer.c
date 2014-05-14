@@ -21,9 +21,10 @@
 
 int fp; 
 
-void write_db(uint8_t* db_value, uint8_t* addr)
+void write_db(uint8_t* db_value, send_info* send)
 {
-    if (ioctl(addr, EQUALIZER_DRIVER_WRITE_DIGIT, db_value) == -1)
+    int fd = open("/dev/freq_spec", O_RDWR);    
+    if (ioctl(fd, EQUALIZER_DRIVER_WRITE_DIGIT, send) == -1)
         printf("EQUALIZER_DRIVER_WRITE_DIGIT failed: %s\n",
             strerror(errno));
     else {
@@ -45,8 +46,12 @@ int main()
     uint8_t addr, db_value; 
     addr = (uint8_t *) ("4'd" + freq - 1); 
     db_value = (uint8_t *) db; 
+    
+    struct send_info sendi;
+    sendi.addr = addr; 
+    sendi.db = db_value; 
 
-    write_db(db_value, addr); 
+    write_db(db_value, sendi); 
     
     printf("Equalizer Userspace program terminating\n");
     return 0;

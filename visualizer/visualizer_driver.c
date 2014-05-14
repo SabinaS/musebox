@@ -53,7 +53,7 @@ struct visualizer_driver_dev {
  */
 static void write_freq_mem( s16* dataArray )
 {	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); 	
+	iowrite16(SAMPLEBYTEs+dev.virtbase, dataArray , SAMPLENUM); 	
 }
 
 //first, read from freq_spec in 32bit integer: first 16bits real, next 16bits imaginary 
@@ -81,7 +81,7 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 		break;
 
 	case VISUALIZER_DRIVER_READ_FFT:
-		if (copy_from_user(dataArray, (u32*) arg, sizeof(u32)))
+		if (copy_from_user(dataArray, (u32 *) arg, sizeof(u32)))
 			return -EACCES;
 		int i=0;
 		while(i <= 8195){

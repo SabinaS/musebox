@@ -51,9 +51,11 @@ struct equalizer_driver_dev {
 /*
  * read from array (user gives us) and write to memory address (0x0 to 0x65536)
  */
-static void write_mem( u8* db_value )
+static void write_mem( u8* db_value, send_info *send  )
 {	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); //is __iomem compatable with u16	
+	u8 addr = send.addr; 
+	u8 db = send.db; 
+	iowrite16(addr, db , SAMPLENUM); //is __iomem compatable with u16	
 }
 
 
@@ -61,16 +63,16 @@ static void write_mem( u8* db_value )
  * Handle ioctl() calls from userspace:
  * Note extensive error checking of arguments
  */
-static long equalizer_driver_ioctl(u8 * addr, unsigned int cmd, unsigned long arg)
+static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, send_info *send)
 {
-    u8 *db_value = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
+    	u8 *db_value = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
     
 	switch (cmd) {
 	case EQUALIZER_DRIVER_WRITE_DIGIT:
-		if (copy_from_user(dataArray, (u8 *) arg,
+		if (copy_from_user(db_value, send,
 				   sizeof(u16)))
 			return -EACCES;
-		write_mem(db_value); //write dataArray
+		write_mem(db_value, send); //write dataArray
 		break;
 
 	default:

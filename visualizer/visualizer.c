@@ -10,12 +10,11 @@
 #include <linux/unistd.h>
 //#include "usbkeyboard.h"
 #include <linux/pthread.h>
-//#include <linux/slab.h> //need for kmalloc?
 #include <linux/math.h>
 #include <linux/fs.h> //http://www.makelinux.net/ldd3/chp-3-sect-3
 #include "visualizer_driver.h"
 
-#define slot_values = {0, 31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
+#define slot_values[] = {0, 31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
 #define slot_amps[12]; 
 #define slot_heights[12]; 
 #define SAMPLENUM 8192
@@ -27,32 +26,33 @@
 
 void read_samples()
 {
-    int fd = fopen("aud_to_fft.vs", O_RDWR); //file descriptor? 
-    struct freq_bin *freq_data = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array 
+    int fd = fopen("/dev/freq_spec", O_RDWR); //file descriptor? 
+    struct freq_bin *freq_data;
+    freq_data = (freq_bin*) malloc(SAMPLEBYTES); //allocating space for data array 
     
-    if (ioctl(fd, FFT_DRIVER_READ_FFT, freq_data) == -1) //automatically updates freq_data? 
-        printf("FFT_DRIVER_READ_FFT failed: %s\n",
+    if (ioctl(fd, VISUALIZER_DRIVER_READ_FFT, freq_data) == -1) //automatically updates freq_data? 
+        printf("VISUALIZER_DRIVER_READ_FFT failed: %s\n",
             strerror(errno));
     else {
-        if (status & FFT_DRIVER_READ_FFT)
-            puts("FFT_DRIVER_READ_FFT is not set");
+        if (status & VISUALIZER_DRIVER_READ_FFT)
+            puts("VISUALIZER_DRIVER_READ_FFT is not set");
         else
-            puts("FFT_DRIVER_READ_FFT is set");
+            puts("VISUALIZER_DRIVER_READ_FFT is set");
     }
     
 }
 
 void write_samples(int* dataArray)
 {
-    int fd = open("freq_spec.vs", O_RDWR);    
-    if (ioctl(fd, FFT_DRIVER_WRITE_FREQ, dataArray) == -1)
-        printf("FFT_DRIVER_WRITE_FREQ failed: %s\n",
+    int fd = open("/dev/freq_spec", O_RDWR);    
+    if (ioctl(fd, VISUALIZER_DRIVER_WRITE_FREQ, dataArray) == -1)
+        printf("VISUALIZER_DRIVER_WRITE_FREQ failed: %s\n",
             strerror(errno));
     else {
-        if (status & FFT_DRIVER_READ_FFT)
-            puts("FFT_DRIVER_WRITE_FREQ is not set");
+        if (status & VISUALIZER_DRIVER_READ_FFT)
+            puts("VISUALIZER_DRIVER_WRITE_FREQ is not set");
         else
-            puts("FFT_DRIVER_WRITE_FREQ is set");
+            puts("VISUALIZER_DRIVER_WRITE_FREQ is set");
     }
 }
 

@@ -3,6 +3,11 @@
 
 #include <linux/ioctl.h>
 
+struct send_info{
+	uint8_t addr;
+	uint8_t db; 
+}; 
+
 #define VGA_LED_MAGIC 'q'
 
 /* ioctls and their arguments */
