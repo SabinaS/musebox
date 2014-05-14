@@ -9,5 +9,6 @@ dc_fifo	dc_fifo_inst (
 	.rdempty ( rdempty_sig ),
 	.rdfull ( rdfull_sig ),
 	.rdusedw ( rdusedw_sig ),
-	.wrfull ( wrfull_sig )
+	.wrfull ( wrfull_sig ),
+	.wrusedw ( wrusedw_sig )
 	);

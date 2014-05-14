@@ -61,6 +61,7 @@ reg [15:0] romdata [0:99];
 reg [3:0]  modIdx = 4'b0;
 reg [6:0]  index = 7'd0;
 parameter SINE     = 0;
+parameter BYPASS   = 2;
 
 always @(posedge clk) begin
     if (reset) begin
@@ -70,10 +71,16 @@ always @(posedge clk) begin
     end else if (set_lrck || clr_lrck) begin
         // check if current channel is selected
         if (channel_sel[set_lrck]) begin
-            shift_out <= audio_output_l;
+				if (control[BYPASS])
+					shift_out <= shift_in;
+				else
+					shift_out <= audio_output_l;
         // repeat the sample from the other channel if not
         end else begin 
-		      shift_out <= audio_output_r;
+				if (control[BYPASS])
+					shift_out <= shift_in_right;
+				else
+					shift_out <= audio_output_r;
 			end
     end else if (set_bclk == 1) begin
         // only read in if channel is selected

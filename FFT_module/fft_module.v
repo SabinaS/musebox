@@ -92,7 +92,7 @@ module fft_module (
 		.source_imag(source_imag));
 
 	defparam
-		asj_fft_dualstream_fft_131_inst.nps = 4096,
+		asj_fft_dualstream_fft_131_inst.nps = 8192,
 		asj_fft_dualstream_fft_131_inst.bfp = 1,
 		asj_fft_dualstream_fft_131_inst.nume = 2,
 		asj_fft_dualstream_fft_131_inst.mpr = 16,
@@ -101,17 +101,17 @@ module fft_module (
 		asj_fft_dualstream_fft_131_inst.bpb = 4,
 		asj_fft_dualstream_fft_131_inst.fpr = 4,
 		asj_fft_dualstream_fft_131_inst.mram = 0,
-		asj_fft_dualstream_fft_131_inst.m512 = 0,
+		asj_fft_dualstream_fft_131_inst.m512 = 1,
 		asj_fft_dualstream_fft_131_inst.mult_type = 1,
 		asj_fft_dualstream_fft_131_inst.mult_imp = 0,
 		asj_fft_dualstream_fft_131_inst.dsp_arch = 2,
-		asj_fft_dualstream_fft_131_inst.srr = "AUTO_SHIFT_REGISTER_RECOGNITION=ON",
-		asj_fft_dualstream_fft_131_inst.rfs1 = "fft_module_1n4096sin.hex",
-		asj_fft_dualstream_fft_131_inst.rfs2 = "fft_module_2n4096sin.hex",
-		asj_fft_dualstream_fft_131_inst.rfs3 = "fft_module_3n4096sin.hex",
-		asj_fft_dualstream_fft_131_inst.rfc1 = "fft_module_1n4096cos.hex",
-		asj_fft_dualstream_fft_131_inst.rfc2 = "fft_module_2n4096cos.hex",
-		asj_fft_dualstream_fft_131_inst.rfc3 = "fft_module_3n4096cos.hex";
+		asj_fft_dualstream_fft_131_inst.srr = "AUTO_SHIFT_REGISTER_RECOGNITION=OFF",
+		asj_fft_dualstream_fft_131_inst.rfs1 = "fft_module_1n8192sin.hex",
+		asj_fft_dualstream_fft_131_inst.rfs2 = "fft_module_2n8192sin.hex",
+		asj_fft_dualstream_fft_131_inst.rfs3 = "fft_module_3n8192sin.hex",
+		asj_fft_dualstream_fft_131_inst.rfc1 = "fft_module_1n8192cos.hex",
+		asj_fft_dualstream_fft_131_inst.rfc2 = "fft_module_2n8192cos.hex",
+		asj_fft_dualstream_fft_131_inst.rfc3 = "fft_module_3n8192cos.hex";
 endmodule
 
 // =========================================================
@@ -130,7 +130,7 @@ endmodule
 // Retrieval info:      <PRIVATE name = "use_mem" value="1"  type="BOOLEAN"  enable="1" />
 // Retrieval info:      <PRIVATE name = "mem_type" value="M512"  type="STRING"  enable="1" />
 // Retrieval info:      <PRIVATE name = "DEVICE" value="Cyclone V"  type="STRING"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NPS" value="4096"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NPS" value="8192"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "MPR" value="16"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "TWR" value="16"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "OPR" value="29"  type="INTEGER"  enable="1" />
@@ -141,15 +141,15 @@ endmodule
 // Retrieval info:      <PRIVATE name = "MULT_TYPE" value="1"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "MULT_IMP" value="0"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "MEGA" value="0"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "M512" value="1"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "LOGIC_IN_RAM" value="1"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_LE" value="6104"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_M4K" value="156"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "M512" value="4"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "LOGIC_IN_RAM" value="0"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_LE" value="6080"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_M4K" value="256"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "NUM_MEGA" value="0"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_M512" value="0"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_M512" value="768"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "NUM_DSP" value="48"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_CALC_CYCLES" value="4096"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_BLK_THROUGHPUT_CYCLES" value="4096"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_CALC_CYCLES" value="8192"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_BLK_THROUGHPUT_CYCLES" value="8192"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "rfs1" value="romfile_1024.hex"  type="STRING"  enable="1" />
 // Retrieval info:      <PRIVATE name = "rfs2" value="romfile_1024.hex"  type="STRING"  enable="1" />
 // Retrieval info:      <PRIVATE name = "rfs3" value="romfile_1024.hex"  type="STRING"  enable="1" />
@@ -157,7 +157,7 @@ endmodule
 // Retrieval info:      <PRIVATE name = "rfc2" value="romfile_1024.hex"  type="STRING"  enable="1" />
 // Retrieval info:      <PRIVATE name = "rfc3" value="romfile_1024.hex"  type="STRING"  enable="1" />
 // Retrieval info:      <PRIVATE name = "ENA" value="0"  type="INTEGER"  enable="1" />
-// Retrieval info:      <PRIVATE name = "NUM_MEMBITS" value="638976"  type="INTEGER"  enable="1" />
+// Retrieval info:      <PRIVATE name = "NUM_MEMBITS" value="1441792"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "INPUT_ORDER" value="1"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "OUTPUT_ORDER" value="0"  type="INTEGER"  enable="1" />
 // Retrieval info:      <PRIVATE name = "REPRESENTATION" value="0"  type="INTEGER"  enable="1" />
