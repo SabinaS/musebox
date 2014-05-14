@@ -27,7 +27,7 @@
 
 void read_samples()
 {
-    struct file* fd = open("aud_to_fft.vs", O_RDWR); //file descriptor? 
+    struct file* fd = fopen("aud_to_fft.vs", r); //file descriptor? 
     struct freq_bin *freq_data = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array 
     
     if (ioctl(fd, FFT_DRIVER_READ_FFT, freq_data) == -1) //automatically updates freq_data? 
@@ -44,7 +44,7 @@ void read_samples()
 
 void write_samples(int* dataArray)
 {
-    struct file* fd = open("freq_spec.vs", O_RDWR);    
+    struct file* fd = fopen("freq_spec.vs", r+);    
     if (ioctl(fd, FFT_DRIVER_WRITE_FREQ, dataArray) == -1)
         printf("FFT_DRIVER_WRITE_FREQ failed: %s\n",
             strerror(errno));

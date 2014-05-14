@@ -53,8 +53,7 @@ struct equalizer_driver_dev {
  */
 static void write_mem( u8* db_value )
 {	
-	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); //is __iomem compatable with u16
-	
+	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); //is __iomem compatable with u16	
 }
 
 
