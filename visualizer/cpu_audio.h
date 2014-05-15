@@ -3,7 +3,8 @@
 
 #include <linux/ioctl.h>
 
-#define CPU_AUDIO_MAGIC 4104
+#define CPU_AUDIO_MAGIC 4108 * 11
+#define SAMPLENUM 32768
 
 #ifndef CPU_AUDIO_US
 struct sample {
@@ -16,8 +17,6 @@ struct sample {
 	int16_t right;
 };
 #endif
-
-typedef struct sample sample_t;
 
 /* ioctls and their arguments */
 #define CPU_AUDIO_READ_SAMPLES _IOR(CPU_AUDIO_MAGIC, 1, struct sample *) //writes to freq_spec.sv 

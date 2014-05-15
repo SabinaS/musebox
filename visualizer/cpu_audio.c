@@ -1,5 +1,5 @@
 /*
- * Device driver for Visualizer
+ * Device driver for FFT
  *
  * A Platform device implemented using the misc subsystem
  *
@@ -14,10 +14,10 @@
  * http://free-electrons.com/docs/
  *
  * "make" to build
- * insmod visualizer.ko
+ * insmod cpu_audio.ko
  *
  * Check code style with
- * checkpatch.pl --file --no-tree visualizer.c
+ * checkpatch.pl --file --no-tree cpu_audio.c
  */
 
 #include <linux/module.h>
@@ -32,11 +32,10 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h> 
-#include "cpu_audio.h" 
+#include <linux/uaccess.h>
+#include "cpu_audio.h"
 
 #define DRIVER_NAME "cpu_audio"
-#define SAMPLENUM 32768
 
 /*
  * Information about our device
@@ -46,19 +45,11 @@ struct cpu_audio_dev {
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
 } dev;
 
-/*
- * write slot_heights[12] to freq_spec.vs 
- */
-static void read_audio_bank(sample_t *samples)
-{	
-	*((unsigned int *) samples) = ioread32(dev.virtbase); 	
-}
-
-static void write_audio_bank(sample_t *samples)
+// Read the whole transform length from the fft
+static void readAudio(struct sample *smpArr)
 {
-	iowrite32(samples, dev.virtbase);
+	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
 }
-
 
 /*
  * Handle ioctl() calls from userspace:
@@ -66,31 +57,40 @@ static void write_audio_bank(sample_t *samples)
  */
 static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    sample_t *samples = (sample_t *) kmalloc(SAMPLENUM * sizeof(sample_t), GFP_KERNEL); 
-    if (samples == NULL) {
-    	printk("samples is null\n");
+    struct sample *smpArr = kmalloc(SAMPLENUM * sizeof(struct sample), GFP_KERNEL); //allocating space for data array
+    if (!smpArr)
     	return -ENOMEM;
-    }
+
 	switch (cmd) {
 	case CPU_AUDIO_READ_SAMPLES:
-		if (copy_from_user(samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
+		if (copy_from_user(smpArr, (struct sample *) arg,
+				   sizeof(struct sample) * SAMPLENUM)) {
+			kfree(smpArr);
 			return -EACCES;
-		read_audio_bank(samples); //write dataArray
-		if (copy_to_user((sample_t *) arg, samples,
-				 sizeof(sample_t) * SAMPLENUM))
+		}
+		readAudio(smpArr); //read into smpArr
+		if (copy_to_user((struct sample *) arg, smpArr,
+				 sizeof(struct sample) * SAMPLENUM)) {
+			kfree(smpArr);
 			return -EACCES;
+		}
 		break;
 
 	case CPU_AUDIO_WRITE_SAMPLES:
-		if (copy_from_user(&samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
+		if (copy_from_user(smpArr, (struct sample *) arg,
+				   sizeof(struct sample) * SAMPLENUM)) {
+			kfree(smpArr);
 			return -EACCES;
-		write_audio_bank(samples); //write dataArray
+		}
+		writeAudio(smpArr);
 		break;
 
 	default:
+		kfree(smpArr);
 		return -EINVAL;
 	}
 
+	kfree(smpArr);
 	return 0;
 }
 
@@ -115,7 +115,7 @@ static int __init cpu_audio_probe(struct platform_device *pdev)
 {
 	int ret;
 
-	/* Register ourselves as a misc device: creates /dev/visualizer */
+	/* Register ourselves as a misc device: creates /dev/cpu_audio */
 	ret = misc_register(&cpu_audio_misc_device);
 
 	/* Get the address of our registers from the device tree */
@@ -196,4 +196,5 @@ module_exit(cpu_audio_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("MA2799, SS3912");
-MODULE_DESCRIPTION("CPU Audio with Equalizer");
+MODULE_DESCRIPTION("CPU Audio for MuseBox");
+
