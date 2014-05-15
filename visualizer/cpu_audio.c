@@ -21,6 +21,7 @@
  */
 
 #include <linux/module.h>
+#include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/errno.h>
 #include <linux/version.h>
@@ -56,6 +57,7 @@ static int readAudio(struct sample *smpArr)
 		return 1;
 	for (i = 0; i < SAMPLENUM; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
+		udelay(1);
 	}
 	return 0;
 }
