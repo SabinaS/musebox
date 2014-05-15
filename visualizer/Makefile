@@ -10,8 +10,9 @@ else
 	KERNEL_SOURCE := /usr/src/linux
         PWD := $(shell pwd)
 
-default: module
+default: module audio-test
 
+.PHONY: audio-test
 audio-test:
 	gcc -g -Wall -o audio-test audio-test.c -lm
 
