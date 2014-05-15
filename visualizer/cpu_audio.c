@@ -51,6 +51,11 @@ static void readAudio(struct sample *smpArr)
 	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
 }
 
+static void writeAudio(struct sample *smpArr)
+{
+	iowrite32(*(unsigned int *) smpArr, dev.virtbase);
+}
+
 /*
  * Handle ioctl() calls from userspace:
  * Note extensive error checking of arguments
