@@ -48,12 +48,12 @@ struct cpu_audio_dev {
 // Read the whole transform length from the fft
 static int readAudio(struct sample *smpArr)
 {
+	int i;
 	// First, get the number of elements
 	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
 	// If there aren't enough samples, return
 	if ((uint16_t) smpArr[0].left < SAMPLENUM || (uint16_t) smpArr[1].right < SAMPLENUM)
 		return 1;
-	int i;
 	for (i = 0; i < SAMPLENUM; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
 	}
