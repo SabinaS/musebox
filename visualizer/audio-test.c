@@ -19,7 +19,7 @@
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
 
-static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L * 1000L * 10000};
+static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L};
 static struct timespec remaining;
 
 int main()
@@ -55,8 +55,8 @@ int main()
     while (1) {
         while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
             if (errno == EAGAIN) {
-                nanosleep(&duration, &remaining);
-                continue;
+               //nanosleep(&duration, &remaining);
+               continue;
             }
             fprintf(stderr, "errno: %d\n", errno);
             perror("ioctl read failed!");
