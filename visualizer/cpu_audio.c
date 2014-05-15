@@ -103,7 +103,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			kfree(smpArr);
 			return -EAGAIN;
 		}
-		for (i = 0; i < SAMPLENUM * sizeof(char); i++) {
+		for (i = 0; i < SAMPLENUM * sizeof(struct sample); i++) {
 			if (copy_from_user(from + i,  to + i, 1) != 0)
 				break;
 		}
