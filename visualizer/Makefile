@@ -10,7 +10,10 @@ else
 	KERNEL_SOURCE := /usr/src/linux
         PWD := $(shell pwd)
 
-default: module audio-test
+default: module
+
+audio-test:
+	gcc -g -Wall -o audio-test audio-test.c -lm
 
 module:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules

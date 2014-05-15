@@ -108,11 +108,7 @@
    internal="cpu_audio_0.conduit_end"
    type="conduit"
    dir="end" />
- <interface
-   name="vga_debug"
-   internal="cpu_audio_0.conduit_end_1"
-   type="conduit"
-   dir="end" />
+ <interface name="vga_debug" internal="cpu_audio_0.conduit_end_1" />
  <module kind="clock_source" version="13.1" enabled="1" name="clk_0">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -596,6 +592,8 @@
   <parameter name="AUTO_CLOCK_CLOCK_RATE" value="50000000" />
  </module>
  <module kind="cpu_audio" version="1.0" enabled="1" name="cpu_audio_0">
+  <parameter name="FEEDBACK" value="1" />
+  <parameter name="CPU" value="3" />
   <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
  </module>
  <connection

@@ -44,8 +44,8 @@ open_service master $m
 puts "Opened master"
 
 # Write a test pattern to the various registers
-foreach {r v} {0 0xff 1 0x1 2 0x2 3 0x4 4 0x8 5 0x10 6 0x20 7 0x40} {
-    puts "[master_read_32 $m 0x0 0x4]"
+for {set i 0} {$i < 16} {incr i} {
+    puts "[master_write_16 $m 0x20 $i]"
 }
 
 close_service master $m

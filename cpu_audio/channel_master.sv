@@ -35,6 +35,8 @@ wire [15:0] li_rdw;
 wire [15:0] ri_rdw;
 wire li_wrfull;
 wire ri_wrfull;
+wire li_rdfull;
+wire ri_rdfull;
 dcfifo_atc li (
 	.rdclk (system_clk),
 	.wrclk (aud_clk),
@@ -43,7 +45,8 @@ dcfifo_atc li (
 	.data (audio_input_l),
 	.q (li_q),
 	.rdusedw (li_rdw),
-	.wrfull (li_wrfull)
+	.wrfull (li_wrfull),
+	.rdfull (li_rdfull)
 );
 
 dcfifo_atc ri (
@@ -54,7 +57,8 @@ dcfifo_atc ri (
 	.data (audio_input_r),
 	.q (ri_q),
 	.rdusedw (ri_rdw),
-	.wrfull (ri_wrfull)
+	.wrfull (ri_wrfull),
+	.rdfull (ri_rdfull)
 );
 
 // FIFOs going from CPU to audio. These fifos buffer the audio the CPU sends
@@ -217,7 +221,13 @@ always@(posedge system_clk) begin
 	end else if (chipselect && read) begin
 		case (address)
 			1'b0 : begin
-				readdata <= {li_rdw, ri_rdw};
+				// NOTE: if the FIFO is full, then these two values will be zero!
+				// Just tell the CPU that we have the number of samples we need
+				if (li_rdfull || ri_rdfull) begin
+					readdata <= {16'd32769, 16'd32769};
+				end else begin
+					readdata <= {li_rdw, ri_rdw};
+				end
 				li_rdreq <= 1'b0;
 				ri_rdreq <= 1'b0;
 				lo_wrreq <= 1'b0;
