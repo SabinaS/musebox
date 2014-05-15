@@ -46,14 +46,26 @@ struct cpu_audio_dev {
 } dev;
 
 // Read the whole transform length from the fft
-static void readAudio(struct sample *smpArr)
+static int readAudio(struct sample *smpArr)
 {
+	// First, get the number of elements
 	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
+	// If there aren't enough samples, return
+	if (smpArr[0].left < SAMPLENUM || sampArr[1].left < SAMPLENUM)
+		return 1;
+	int i;
+	for (i = 0; i < SAMPLENUM; i++) {
+		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
+	}
+	return 0;
 }
 
 static void writeAudio(struct sample *smpArr)
 {
-	iowrite32(*(unsigned int *) smpArr, dev.virtbase);
+	int i;
+	for (i = 0; i < SAMPLENUM; i++) {
+		iowrite32(((unsigned int *) smpArr)[i], dev.virtbase);
+	}
 }
 
 /*
@@ -73,7 +85,9 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			kfree(smpArr);
 			return -EACCES;
 		}
-		readAudio(smpArr); //read into smpArr
+		// If the returns is non zero, then tell the user to try again
+		if (readAudio(smpArr))
+			return -EAGAIN;
 		if (copy_to_user((struct sample *) arg, smpArr,
 				 sizeof(struct sample) * SAMPLENUM)) {
 			kfree(smpArr);
