@@ -40,8 +40,13 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    if (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+    if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
         perror("ioctl write failed!");
+        close(box_fd);
+        return -1;
+    }
+    if (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+        perror("ioctl read failed!");
         close(box_fd);
         return -1;
     }
