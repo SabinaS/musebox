@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 //#include "usbkeyboard.h"
+#include <time.h>
 #include <math.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -17,6 +18,9 @@
 
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
+
+static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L * 1000L * 10000};
+static struct timespec remaining;
 
 int main()
 {
@@ -47,16 +51,20 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
-        perror("ioctl write failed!");
-        close(box_fd);
-        return -1;
-    }
-    if (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
-        fprintf(stderr, "errno: %d\n", errno);
-        perror("ioctl read failed!");
-        close(box_fd);
-        return -1;
+    while (1) {
+        while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+            if (errno == EAGAIN) {
+                nanosleep(&duration, &remaining);
+            }
+            perror("ioctl read failed!");
+            close(box_fd);
+            return -1;
+        }
+        if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
+            perror("ioctl write failed!");
+            close(box_fd);
+            return -1;
+        }
     }
     // Print out the values
     printf("left: %d, right %d\n", samples[0].left, samples[0].right);
