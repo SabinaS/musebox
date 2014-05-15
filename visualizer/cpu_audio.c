@@ -64,7 +64,7 @@ static int readAudio(struct sample *smpArr)
 	// printk("size of struct: %lu, unsigned int: %d\n", sizeof(struct sample), sizeof(unsigned int));
 	for (i = 0; i < SAMPLENUM; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 1);
-		printk("Sample %d: left: %d, %d", (uint16_t) smpArr[0].left, (uint16_t) smpArr[0].right);
+		printk("Sample %d: left: %h, %h\n", i, smpArr[0].left, smpArr[0].right);
 	}
 	return 0;
 }
