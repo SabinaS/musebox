@@ -53,17 +53,18 @@ static int readAudio(struct sample *smpArr)
 	// First, get the number of elements
 	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
 	// If there aren't enough samples, return
-	if ((uint16_t) smpArr[0].left % 10 == 0)
-		printk("Samples read %u, %u\n", (uint16_t) smpArr[0].left, (uint16_t) smpArr[0].right);
+	// if ((uint16_t) smpArr[0].left % 10 == 0)
+	// 	printk("Samples read %u, %u\n", (uint16_t) smpArr[0].left, (uint16_t) smpArr[0].right);
 	if ((uint16_t) smpArr[0].left < SAMPLENUM || (uint16_t) smpArr[0].right < SAMPLENUM) {
 		// printk("Only %u samples.\n", (uint16_t) smpArr[0].left);
 		return 1;
 	}
-	if ((uint16_t) smpArr[0].left % 10 == 0)
-		printk("Copying: %u samples\n", (uint16_t) smpArr[0].left);
+	// if ((uint16_t) smpArr[0].left % 10 == 0)
+	// 	printk("Copying: %u samples\n", (uint16_t) smpArr[0].left);
 	// printk("size of struct: %lu, unsigned int: %d\n", sizeof(struct sample), sizeof(unsigned int));
 	for (i = 0; i < SAMPLENUM; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 1);
+		printk("Sample %d: left: %d, %d", (uint16_t) smpArr[0].left, (uint16_t) smpArr[0].right);
 	}
 	return 0;
 }
