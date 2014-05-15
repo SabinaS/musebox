@@ -85,6 +85,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
 	int i;
     struct sample *smpArr = kmalloc(SAMPLENUM * sizeof(struct sample), GFP_KERNEL); //allocating space for data array
+	char *from = smpArr, *to = (char *) arg;
     if (!smpArr)
     	return -ENOMEM;
 
@@ -101,7 +102,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			return -EAGAIN;
 		}
 		for (i = 0; i < n; i++, to++, from++) {
-			if (copy_from_user(smpArr, (struct sample *), 1) != 0)
+			if (copy_from_user(from, to, 1) != 0)
 				break;
 		}
 		printk("Bytes read: %d, expected size: %d\n", i, sizeof(struct sample) * SAMPLENUM);
