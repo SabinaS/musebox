@@ -27,13 +27,13 @@ int main()
     char *file = "/dev/cpu_audio";
     int box_fd;
 
-    struct sample *samples = (struct samples *) calloc(SAMPLENUM, sizeof(struct samples));
+    struct sample *samples = (struct sample *) calloc(SAMPLENUM, sizeof(struct sample));
     int i;
     // 1 K sine wave
-    for (i = 0; i < SAMPLENUM; i++) {
-        samples[i].left = 16383 * sin(250 * (2 * M_PI) * i / 44100);
-        samples[i].right = 16383 * sin(250 * (2 * M_PI) * i / 44100);
-    }
+    // for (i = 0; i < SAMPLENUM; i++) {
+    //     samples[i].left = 16383 * sin(250 * (2 * M_PI) * i / 44100);
+    //     samples[i].right = 16383 * sin(250 * (2 * M_PI) * i / 44100);
+    // }
 
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
         fprintf(stderr, "could not open %s\n", file);
@@ -51,8 +51,8 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    printf("size of sample: %lu\n", sizeof(struct sample));
-    while (1) {
+    printf("size of sample: %u\n", sizeof(struct sample));
+    //while (1) {
         while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
             if (errno == EAGAIN) {
                //nanosleep(&duration, &remaining);
@@ -63,12 +63,15 @@ int main()
             close(box_fd);
             return -1;
         }
+        // for (i = 0; i < SAMPLENUM; i++)
+        //     printf("%d: Sample left: %d, right: %d\n", i, samples[i].left, samples[i].right);
+        printf("Sample location: %p\n", samples);
         if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
             perror("ioctl write failed!");
             close(box_fd);
             return -1;
         }
-    }
+    //}
     // Print out the values
     printf("left: %d, right %d\n", samples[0].left, samples[0].right);
     //     usleep(1/60.0 * 100000);

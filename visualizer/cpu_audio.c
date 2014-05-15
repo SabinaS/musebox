@@ -104,6 +104,7 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			kfree(smpArr);
 			return -EACCES;
 		}
+        printk("user location: %p\n", (void *) arg);
 		break;
 
 	case CPU_AUDIO_WRITE_SAMPLES:
