@@ -17,9 +17,6 @@
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
 
-#define SAMPLENUM 32768
-#define H25K 4096
-
 int main()
 {
     char *file = "/dev/cpu_audio";
@@ -30,7 +27,7 @@ int main()
         return -1;
     }
 
-    sample_t samples[SAMPLENUM];
+    struct sample samples[SAMPLENUM];
     // int bar = 0;
     // int height = 240;
     // int dir = 0;
@@ -49,7 +46,7 @@ int main()
         return -1;
     }
     // Print out the values
-    printf("left: %u, right %u\n", (uint16_t) samples[0].left, (uint16_t) samples[0].right);
+    printf("left: %d, right %d\n", samples[0].left, samples[0].right);
     //     usleep(1/60.0 * 100000);
     //     if (height == 479)
     //         dir = 0;
