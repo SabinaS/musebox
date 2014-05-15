@@ -1,0 +1,23 @@
+module aud_to_cpu (
+	input  aud_clk,
+	input  aud_reset,
+	input  system_clk,
+	input  system_reset,
+	// If true, then our channel is active
+	input  chan_req,
+	input  chan_end,
+   input  [15:0] audio_input,
+	output [15:0] audio_output,
+	output [15:0] vga_dat,
+	output vga_dowrite,
+	output vga_select,
+	output [1:0] vga_addr,
+	output [31:0] readdata,
+	input  address,
+	input  chipselect,
+	input  read
+);
+
+
+
+endmodule

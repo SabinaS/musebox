@@ -7,7 +7,7 @@ module add_signed (
 	output signed [6:0] sum
 );
 
-assign sum = A + B + 6'sd13;
+assign sum = {A[5],A} + {B[5],B} + 7'sd10;
 
 endmodule
 
@@ -15,6 +15,7 @@ module audio_to_fft (
    input  aud_clk,
 	input  fft_clk,
 	input  system_clk,
+	input  system_reset,
 	input  reset,
 	// If true, then we should read the data for our fft
 	input  chan_req,
@@ -26,7 +27,7 @@ module audio_to_fft (
 	output vga_select,
 	output [1:0] vga_addr,
 	output [31:0] readdata,
-	input  [1:0] address,
+	input  address,
 	input  chipselect,
 	input  read
 );
@@ -58,18 +59,18 @@ wire fft_in_sivalid;
 wire fft_in_sovalid;
 wire fft_in_sosop;
 wire fft_in_soeop;
+wire [15:0] fft_in_sireal;
 wire [15:0] fft_in_soreal;
 wire [15:0] fft_in_soimag;
 wire source_can_accept_input;
 wire [5:0] fft_in_exp;
 reg  [5:0] fft_in_exp_reg;
-
 fft_module fft_in (
 	.clk (fft_clk),
 	.reset_n (!reset),
 	.sink_error (2'b0),
 	.sink_ready (fft_in_can_accept_input),
-	.sink_real (dc_out),
+	.sink_real (fft_in_sireal),
 	.sink_imag (16'b0),
 	.sink_sop (fft_in_sisop),
 	.sink_valid (fft_in_sivalid),
@@ -87,6 +88,7 @@ fft_module fft_in (
 
 // CPU FIFO
 wire cpu_rdreq;
+wire cpu_wrreq;
 wire [15:0] cpu_cnt;
 wire cpu_is_empty;
 wire [31:0] cpu_q;
@@ -94,7 +96,7 @@ cpu_fifo fft_dat (
 	.rdclk (system_clk),
 	.wrclk (fft_clk),
 	.data ({fft_in_soreal, fft_in_soimag}),
-	.wrreq (fft_in_sovalid),
+	.wrreq (cpu_wrreq),
 	.rdreq (cpu_rdreq),
 	.rdusedw (cpu_cnt),
 	.rdempty (cpu_is_empty),
@@ -264,8 +266,20 @@ always @(posedge fft_clk) begin
 end
 
 reg [15:0] pos;
+reg signed [31:0] scaled;
+reg signed [31:0] index = 32'sd0;
 reg [15:0] fill;
 reg fill_fft;
+
+// Compute the scaled values ahead of time
+always_comb begin
+	scaled = dc_out;
+	if (index < 32'sd2048) begin
+		scaled = (scaled * index) / 32'sd2048;
+	end else if (index >= 32'sd6144) begin
+		scaled = (scaled * (32'sd8191 - index)) / 32'sd2048;
+	end
+end
 
 // Logic for filling the input FFT
 always @(posedge fft_clk) begin
@@ -277,6 +291,7 @@ always @(posedge fft_clk) begin
 	else if (fill_fft && fft_in_can_accept_input) begin
 		// Indicate to the FFT that we can send data and send the first sample
 		if (pos == 16'd0) begin
+			fft_in_sireal <= {scaled[31], scaled[14:0]};
 			// Acknowledge that we've read this word
 			rdreq <= 1'b1;
 			// Assert that the data on the bus is valid
@@ -284,36 +299,44 @@ always @(posedge fft_clk) begin
 			// Indicate that this is the first packet
 			fft_in_sisop <= 1'b1;
 			pos <= pos + 1'b1;
+			index <= index + 32'sd1;
 		// Deassert SOP on the next cycle
 		end else if (pos == 16'd1) begin
 			// Assert that the data on the bus is valid
+			fft_in_sireal <= {scaled[31], scaled[14:0]};
 			fft_in_sivalid <= 1'b1;
 			// Acknowledge that we've read this word
 			rdreq <= 1'b1;
 			// Deassert SOP
 			fft_in_sisop <= 1'b0;
 			pos <= pos + 1'b1;
+			index <= index + 32'sd1;
 		// For the last sample, assert eop
 		end else if (pos == SAMPLES - 15'b1) begin
 			fft_in_sieop <= 1'b1;
 			// Acknowledge that we've read this word
 			rdreq <= 1'b1;
 			// Assert that the data on the bus is valid
+			fft_in_sireal <= {scaled[31], scaled[14:0]};
 			fft_in_sivalid <= 1'b1;
 			pos <= pos + 1'b1;
+			index <= index + 32'sd1;
 		// Deassert all other signals
 		end else if (pos == SAMPLES) begin
 			fft_in_sieop <= 1'b0;
 			fft_in_sivalid <= 1'b0;
 			rdreq <= 1'b0;
 			pos <= 16'b0;
+			index <= 32'sd0;
 		// For all the other positions
 		end else begin
+			fft_in_sireal <= {scaled[31], scaled[14:0]};
 			// Assert that the data on the bus is valid
 			fft_in_sivalid <= 1'b1;
 			// Acknowledge that we've read this word
 			rdreq <= 1'b1;
 			pos <= pos + 16'b1;
+			index <= index + 32'sd1;
 			vga_dowrite <= 1'b1;
 			vga_select <= 1'b1;
 			if (fill % 4 == 2'd3) begin
@@ -335,8 +358,16 @@ always @(posedge fft_clk) begin
 		vga_select <= 1'b1;
 	end
 	// Record the exponent of the fft input block
-	if (fft_in_sosop) begin
+	if (fft_in_sosop && fft_in_sovalid) begin
 		fft_in_exp_reg <= fft_in_exp;
+		// Read this data into the cpu
+		cpu_wrreq <= 1'b1;
+	end else if (fft_in_sovalid) begin
+		// For all other positions, always read in
+		cpu_wrreq <= 1'b1;
+	end else begin
+		// Do nothing
+		cpu_wrreq <= 1'b0;
 	end
 end
 
@@ -361,22 +392,22 @@ initial begin
 end
 
 // Bus interface logic
-reg cpu_queue_empty_last_read = 1'b0;
 
 always_ff @(posedge system_clk) begin
-	if (reset) begin
+	if (system_reset) begin
+		cpu_rdreq <= 1'b0;
 		// I'll figure out what to do later
 	end else if (chipselect && read) begin
 		case (address)
-			2'd0 : begin
-				// Check to see if the queue is empty
-				cpu_queue_empty_last_read <= cpu_is_empty;
+			1'd0 : begin
+				// In the first address, tell them our size and exponent
+				readdata <= {total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent[6], total_exponent, cpu_cnt};
+				cpu_rdreq <= 1'b0;
+			end
+			1'd1 : begin
+				// In the second address, unconditionally give them the data
 				readdata <= cpu_q;
 				cpu_rdreq <= 1'b1;
-			end
-			2'd1 : begin
-				readdata <= {31'b0, cpu_queue_empty_last_read};
-				cpu_rdreq <= 1'b0;
 			end
 			default : cpu_rdreq <= 1'b0;
 		endcase

@@ -116,40 +116,40 @@ always_comb begin
 		pos = pos + 14'b1;
 	end
 	// Scale by the ranges
-	if (pos < H31) begin
+	if (pos < H31 + 14'd4) begin
 		outimag = shift_num(s31, inimag);
 		outreal = shift_num(s31, inreal);
-	end else if (pos < H72) begin
+	end else if (pos < H72 + 14'd7) begin
 		outimag = shift_num(s72, inimag);
 		outreal = shift_num(s72, inreal);
-	end else if (pos < H150) begin
+	end else if (pos < H150 + 14'd9) begin
 		outimag = shift_num(s150, inimag);
 		outreal = shift_num(s150, inreal);
-	end else if (pos < H250) begin
+	end else if (pos < H250 + 14'd18) begin
 		outimag = shift_num(s250, inimag);
 		outreal = shift_num(s250, inreal);
-	end else if (pos < H440) begin
+	end else if (pos < H440 + 14'd18) begin
 		outimag = shift_num(s440, inimag);
 		outreal = shift_num(s440, inreal);
-	end else if (pos < H630) begin
+	end else if (pos < H630 + 14'd34) begin
 		outimag = shift_num(s630, inimag);
 		outreal = shift_num(s630, inreal);
-	end else if (pos < H1K) begin
+	end else if (pos < H1K + 14'd139) begin
 		outimag = shift_num(s1k, inimag);
 		outreal = shift_num(s1k, inreal);
-	end else if (pos < H2_5K) begin
+	end else if (pos < H2_5K + 14'd232) begin
 		outimag = shift_num(s2_5k, inimag);
 		outreal = shift_num(s2_5k, inreal);
-	end else if (pos < H5K) begin
+	end else if (pos < H5K + 14'd279) begin
 		outimag = shift_num(s72, inimag);
 		outreal = shift_num(s72, inreal);
-	end else if (pos < H8K) begin
+	end else if (pos < H8K + 14'd557) begin
 		outimag = shift_num(s8k, inimag);
 		outreal = shift_num(s8k, inreal);
-	end else if (pos < H14K) begin
+	end else if (pos < H14K + 14'd557) begin
 		outimag = shift_num(s14k, inimag);
 		outreal = shift_num(s14k, inreal);
-	end else if (pos < H20K) begin
+	end else if (pos < H20K + 14'd381) begin
 		outimag = shift_num(s20k, inimag);
 		outreal = shift_num(s20k, inreal);
 	end

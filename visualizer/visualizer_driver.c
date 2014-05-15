@@ -32,11 +32,12 @@
 #include <linux/of.h>
 #include <linux/of_address.h>
 #include <linux/fs.h>
-#include <linux/uaccess.h> 
-#include "visualizer_driver.h" 
+#include <linux/uaccess.h>
+#include "visualizer_driver.h"
 
 #define DRIVER_NAME "visualizer"
 #define SAMPLENUM 8192
+#define SAMPLEBYTES SAMPLENUM*2
 
 /*
  * Information about our device
@@ -44,14 +45,24 @@
 struct visualizer_driver_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
+	u32 dataArray, boolean; 
 } dev;
 
 /*
  * write slot_heights[12] to freq_spec.vs 
  */
-static void write_freq_mem(freq_slot *slot)
+static void write_freq_mem( s16* dataArray )
 {	
-	iowrite16(slot->height, dev.virtbase + slot->addr); 	
+	iowrite16(SAMPLEBYTEs+dev.virtbase, dev.virtbase , SAMPLENUM); 
+	
+}
+
+//first, read from freq_spec in 32bit integer: first 16bits real, next 16bits imaginary 
+//then read in next 32bit which is one or zero whether the data is valid
+static void read_fft_mem( u32* dataArray)
+{
+    	ioread32( dev.virtbase, dataArray, SAMPLENUM*4);
+
 }
 
 
@@ -61,13 +72,37 @@ static void write_freq_mem(freq_slot *slot)
  */
 static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    freq_slot bin; 
+    u32 *dataArray = kmalloc(SAMPLEBYTES, GFP_KERNEL); //allocating space for data array
+    freq_bin bins[8192]; 
 
 	switch (cmd) {
-	case VISUALIZER_WRITE_FREQ:
-		if (copy_from_user(&bin, (freq_slot *) arg, sizeof(freq_slot)))
+	case VISUALIZER_DRIVER_WRITE_FREQ:
+		if (copy_from_user(dataArray, (u32 *) arg,
+				   sizeof(u32)))
 			return -EACCES;
-		write_freq_mem(&bin); //write dataArray
+		write_freq_mem(dataArray); //write dataArray
+		break;
+
+	case VISUALIZER_DRIVER_READ_FFT:
+		if (copy_from_user(dataArray, (u32*) arg,
+				   sizeof(u32)))
+			return -EACCES;
+		int i=0;
+		while(i <= 8195){
+			freq_bin bin;
+			s16 *data = (s16 *) &read_fft_mem(dataArray); 
+			bin.real = data[0];
+			bin.imag = data[1];
+			bins[i] = bin; 
+			s16 *boolean = (s16 *) &read_fft_mem(dataArray+4);
+			if((int)boolean[1] = 0){ //second s16 part of boolean contains valid bit
+				bins[i] = bin; 
+				i++
+			} 
+		}
+		if (copy_to_user((s16 *) arg, bins,
+				 sizeof(u32)))
+			return -EACCES;
 		break;
 
 	default:
@@ -80,7 +115,8 @@ static long visualizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned l
 /* The operations our device knows how to do */
 static const struct file_operations visualizer_fops = {
 	.owner		= THIS_MODULE,
-	.unlocked_ioctl = visualizer_driver_ioctl,
+	.unlocked_ioctl = visualizer_ioctl,
+
 };
 
 /* Information about our device for the "misc" framework -- like a char dev */
@@ -144,7 +180,7 @@ static int visualizer_remove(struct platform_device *pdev)
 /* Which "compatible" string(s) to search for in the Device Tree */
 #ifdef CONFIG_OF
 static const struct of_device_id visualizer_of_match[] = {
-	{ .compatible = "altr,frec_spec" },
+	{ .compatible = "altr,visualizer" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, visualizer_of_match);
