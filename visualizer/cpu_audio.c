@@ -91,8 +91,10 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			return -EACCES;
 		}
 		// If the returns is non zero, then tell the user to try again
-		if (readAudio(smpArr))
+		if (readAudio(smpArr)) {
+			kfree(smpArr);
 			return -EAGAIN;
+		}
 		if (copy_to_user((struct sample *) arg, smpArr,
 				 sizeof(struct sample) * SAMPLENUM)) {
 			kfree(smpArr);
