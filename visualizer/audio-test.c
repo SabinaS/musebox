@@ -30,10 +30,10 @@ int main()
     struct sample samples[SAMPLENUM];
     int i;
     // 1 K sine wave
-    for (i = 0; i < SAMPLENUM; i++) {
-        samples[i].left = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
-        samples[i].right = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
-    }
+    // for (i = 0; i < SAMPLENUM; i++) {
+    //     samples[i].left = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
+    //     samples[i].right = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
+    // }
 
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
         fprintf(stderr, "could not open %s\n", file);
