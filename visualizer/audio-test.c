@@ -27,7 +27,7 @@ int main()
     char *file = "/dev/cpu_audio";
     int box_fd;
 
-    struct sample samples[SAMPLENUM] = {{0,0}};
+    struct sample *samples = (struct samples *) calloc(SAMPLENUM, sizeof(struct samples));
     int i;
     // 1 K sine wave
     for (i = 0; i < SAMPLENUM; i++) {
