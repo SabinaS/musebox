@@ -51,7 +51,7 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    printf("size of sample: %lu\n" sizeof(struct sample));
+    printf("size of sample: %lu\n", sizeof(struct sample));
     while (1) {
         while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
             if (errno == EAGAIN) {
