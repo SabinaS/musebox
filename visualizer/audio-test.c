@@ -23,12 +23,18 @@ int main()
     char *file = "/dev/cpu_audio";
     int box_fd;
 
+    struct sample samples[SAMPLENUM];
+    int i;
+    // 1 K sine wave
+    for (i = 0; i < SAMPLENUM; i++) {
+        samples[i].left = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
+        samples[i].right = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
+    }
+
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
         fprintf(stderr, "could not open %s\n", file);
         return -1;
     }
-
-    struct sample samples[SAMPLENUM];
     // int bar = 0;
     // int height = 240;
     // int dir = 0;
@@ -41,11 +47,11 @@ int main()
     //     if (bar == 12)
     //         bar = 0;
     //     slot.height = height;
-    // if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
-    //     perror("ioctl write failed!");
-    //     close(box_fd);
-    //     return -1;
-    // }
+    if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
+        perror("ioctl write failed!");
+        close(box_fd);
+        return -1;
+    }
     if (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
         fprintf(stderr, "errno: %d\n", errno);
         perror("ioctl read failed!");
