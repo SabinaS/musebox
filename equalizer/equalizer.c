@@ -1,27 +1,25 @@
 //takes in 8k samples from fft_driver, equalizes them, passes them back to fft_driver
 
-/*#include <linux/stdio.h>
-#include <linux/unistd.h>
-#include <linux/stdint.h>
-#include <linux/sys/ioctl.h>
-#include <linux/sys/types.h>
-#include <linux/sys/stat.h>
-#include <linux/fcntl.h>
-#include <linux/string.h>
-#include <linux/time.h>
-#include <linux/stdlib.h>
-#include <linux/slab.h> */
+#include <stdio.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "equalizer_driver.h"
 
-#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, uint8_t *)
+#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u32 *)
 
 #define DRIVER_NAME "equalizer_driver"
 #define SAMPLENUM 8
 #define SAMPLEBYTES SAMPLENUM*2
 
-int fp; 
 
-void write_db(uint8_t* db_value, send_info* send)
+void write_db(send_info* send)
 {
     int fd = open("/dev/freq_spec", O_RDWR);    
     if (ioctl(fd, EQUALIZER_DRIVER_WRITE_DIGIT, send) == -1)
@@ -38,20 +36,21 @@ void write_db(uint8_t* db_value, send_info* send)
 int main()
 {
     int freq,db;
-    printf("Please type in the frequency you want to change (1 to 12):\n");
+    printf("Please type in the frequency you want to change (0 to 11):\n");
     scanf("%d",&freq);
-    printf("Please type in the decibal value you would like to change it to (-12 to 12):\n");
+    printf("Please type in the decibal value you would like to change it to (1 to 25):\n");
     scanf("%d",&db);
 
-    uint8_t addr, db_value; 
-    addr = (uint8_t *) ("4'd" + freq - 1); 
-    db_value = (uint8_t *) db; 
+    int addr, db_value; 
+    addr = (int) freq; 
+    db_value = (int) db; 
     
     struct send_info sendi;
+    sendi = (send_info *) malloc(SAMPLEBYTES);
     sendi.addr = addr; 
     sendi.db = db_value; 
 
-    write_db(db_value, sendi); 
+    write_db(sendi); 
     
     printf("Equalizer Userspace program terminating\n");
     return 0;

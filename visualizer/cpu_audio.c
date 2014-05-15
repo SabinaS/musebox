@@ -1,5 +1,5 @@
 /*
- * Device driver for Equalizer
+ * Device driver for Visualizer
  *
  * A Platform device implemented using the misc subsystem
  *
@@ -14,10 +14,10 @@
  * http://free-electrons.com/docs/
  *
  * "make" to build
- * insmod equalizer.ko
+ * insmod visualizer.ko
  *
  * Check code style with
- * checkpatch.pl --file --no-tree equalizer.c
+ * checkpatch.pl --file --no-tree visualizer.c
  */
 
 #include <linux/module.h>
@@ -33,26 +33,30 @@
 #include <linux/of_address.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h> 
-#include "equalizer_driver.h"
+#include "cpu_audio.h" 
 
-#define DRIVER_NAME "equalizer"
-#define SAMPLENUM 8
-#define SAMPLEBYTES SAMPLENUM*2
+#define DRIVER_NAME "cpu_audio"
+#define SAMPLENUM 32768
 
 /*
  * Information about our device
  */
-struct equalizer_driver_dev {
+struct cpu_audio_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
 } dev;
 
 /*
- * read from array (user gives us) and write to memory address (0x0 to 0x65536)
+ * write slot_heights[12] to freq_spec.vs 
  */
-static void write_mem(send_info *send  )
+static void read_audio_bank(sample_t *samples)
 {	
-	iowrite16(send->db, dev.virtbase + send->addr); //is __iomem compatable with u16	
+	*((unsigned int *) samples) = ioread32(dev.virtbase); 	
+}
+
+static void write_audio_bank(sample_t *samples)
+{
+	iowrite32(samples, dev.virtbase);
 }
 
 
@@ -60,15 +64,27 @@ static void write_mem(send_info *send  )
  * Handle ioctl() calls from userspace:
  * Note extensive error checking of arguments
  */
-static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-    	send_info send; 
-    
+    sample_t *samples = (sample_t *) kmalloc(SAMPLENUM * sizeof(sample_t), GFP_KERNEL); 
+    if (samples == NULL) {
+    	printk("samples is null\n");
+    	return -ENOMEM;
+    }
 	switch (cmd) {
-	case EQUALIZER_DRIVER_WRITE_DIGIT:
-		if (copy_from_user(&send, (send_info *) arg, sizeof(send_info)))
+	case CPU_AUDIO_READ_SAMPLES:
+		if (copy_from_user(samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
 			return -EACCES;
-		write_mem(&send); //write send
+		read_audio_bank(samples); //write dataArray
+		if (copy_to_user((sample_t *) arg, samples,
+				 sizeof(sample_t) * SAMPLENUM))
+			return -EACCES;
+		break;
+
+	case CPU_AUDIO_WRITE_SAMPLES:
+		if (copy_from_user(&samples, (sample_t *) arg, sizeof(sample_t) * SAMPLENUM))
+			return -EACCES;
+		write_audio_bank(samples); //write dataArray
 		break;
 
 	default:
@@ -79,29 +95,28 @@ static long equalizer_driver_ioctl(struct file *f, unsigned int cmd, unsigned lo
 }
 
 /* The operations our device knows how to do */
-static const struct file_operations equalizer_fops = {
+static const struct file_operations cpu_audio_fops = {
 	.owner		= THIS_MODULE,
-	.unlocked_ioctl = equalizer_driver_ioctl,
-
+	.unlocked_ioctl = cpu_audio_ioctl,
 };
 
 /* Information about our device for the "misc" framework -- like a char dev */
-static struct miscdevice equalizer_misc_device = {
+static struct miscdevice cpu_audio_misc_device = {
 	.minor		= MISC_DYNAMIC_MINOR,
 	.name		= DRIVER_NAME,
-	.fops		= &equalizer_fops,
+	.fops		= &cpu_audio_fops,
 };
 
 /*
  * Initialization code: get resources (registers) and display
  * a welcome message
  */
-static int __init equalizer_probe(struct platform_device *pdev)
+static int __init cpu_audio_probe(struct platform_device *pdev)
 {
 	int ret;
 
-	/* Register ourselves as a misc device: creates /dev/equalizer */
-	ret = misc_register(&equalizer_misc_device);
+	/* Register ourselves as a misc device: creates /dev/visualizer */
+	ret = misc_register(&cpu_audio_misc_device);
 
 	/* Get the address of our registers from the device tree */
 	ret = of_address_to_resource(pdev->dev.of_node, 0, &dev.res);
@@ -130,55 +145,55 @@ static int __init equalizer_probe(struct platform_device *pdev)
 out_release_mem_region:
 	release_mem_region(dev.res.start, resource_size(&dev.res));
 out_deregister:
-	misc_deregister(&equalizer_misc_device);
+	misc_deregister(&cpu_audio_misc_device);
 	return ret;
 }
 
 /* Clean-up code: release resources */
-static int equalizer_remove(struct platform_device *pdev)
+static int cpu_audio_remove(struct platform_device *pdev)
 {
 	iounmap(dev.virtbase);
 	release_mem_region(dev.res.start, resource_size(&dev.res));
-	misc_deregister(&equalizer_misc_device);
+	misc_deregister(&cpu_audio_misc_device);
 	return 0;
 }
 
 /* Which "compatible" string(s) to search for in the Device Tree */
 #ifdef CONFIG_OF
-static const struct of_device_id equalizer_of_match[] = {
-	{ .compatible = "altr,equalizer" },
+static const struct of_device_id cpu_audio_of_match[] = {
+	{ .compatible = "altr,cpu_audio" },
 	{},
 };
-MODULE_DEVICE_TABLE(of, equalizer_of_match);
+MODULE_DEVICE_TABLE(of, cpu_audio_of_match);
 #endif
 
 /* Information for registering ourselves as a "platform" driver */
-static struct platform_driver equalizer_driver = {
+static struct platform_driver cpu_audio_driver = {
 	.driver	= {
 		.name	= DRIVER_NAME,
 		.owner	= THIS_MODULE,
-		.of_match_table = of_match_ptr(equalizer_of_match),
+		.of_match_table = of_match_ptr(cpu_audio_of_match),
 	},
-	.remove	= __exit_p(equalizer_remove),
+	.remove	= __exit_p(cpu_audio_remove),
 };
 
 /* Calball when the module is loaded: set things up */
-static int __init equalizer_init(void)
+static int __init cpu_audio_init(void)
 {
 	pr_info(DRIVER_NAME ": init\n");
-	return platform_driver_probe(&equalizer_driver, equalizer_probe);
+	return platform_driver_probe(&cpu_audio_driver, cpu_audio_probe);
 }
 
 /* Calball when the module is unloaded: release resources */
-static void __exit equalizer_exit(void)
+static void __exit cpu_audio_exit(void)
 {
-	platform_driver_unregister(&equalizer_driver);
+	platform_driver_unregister(&cpu_audio_driver);
 	pr_info(DRIVER_NAME ": exit\n");
 }
 
-module_init(equalizer_init);
-module_exit(equalizer_exit);
+module_init(cpu_audio_init);
+module_exit(cpu_audio_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("MA2799, SS3912");
-MODULE_DESCRIPTION("EQUALIZER");
+MODULE_DESCRIPTION("CPU Audio with Equalizer");

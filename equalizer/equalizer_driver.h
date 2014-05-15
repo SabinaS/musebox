@@ -3,14 +3,14 @@
 
 #include <linux/ioctl.h>
 
-struct send_info{
-	uint8_t addr;
-	uint8_t db; 
-}; 
+typedef struct{
+	int addr;
+	int db; 
+}send_info; 
 
-#define VGA_LED_MAGIC 'q'
+#define EQUALIZER_MAGIC 'q'
 
 /* ioctls and their arguments */
-#define EQUALIZER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u8 *)
+#define EQUALIZER_DRIVER_WRITE_DIGIT _IOW(EQUALIZER_MAGIC, 1, u32 *)
 
 #endif
