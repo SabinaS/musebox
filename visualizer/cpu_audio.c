@@ -55,8 +55,10 @@ static int readAudio(struct sample *smpArr)
 	// If there aren't enough samples, return
 	if ((uint16_t) smpArr[0].left < SAMPLENUM || (uint16_t) smpArr[0].right < SAMPLENUM)
 		return 1;
+	printk("size of struct: %lu\n" sizeof(struct sample));
 	for (i = 0; i < SAMPLENUM; i++) {
-		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 1);
+		((u32 *) smpArr)[i] = ioread32(dev.virtbase + 1);
+		udelay(1);
 	}
 	return 0;
 }
@@ -65,7 +67,8 @@ static void writeAudio(struct sample *smpArr)
 {
 	int i;
 	for (i = 0; i < SAMPLENUM; i++) {
-		iowrite32(((unsigned int *) smpArr)[i], dev.virtbase);
+		iowrite32(((u32 *) smpArr)[i], dev.virtbase);
+		udelay(1);
 	}
 }
 
