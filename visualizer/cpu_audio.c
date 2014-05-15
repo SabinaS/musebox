@@ -67,6 +67,7 @@ static void writeAudio(struct sample *smpArr)
 	int i;
 	for (i = 0; i < SAMPLENUM; i++) {
 		iowrite32(((unsigned int *) smpArr)[i], dev.virtbase);
+		udelay(1);
 	}
 }
 
