@@ -52,11 +52,13 @@ static int readAudio(struct sample *smpArr)
 	int i;
 	// First, get the number of elements
 	*((unsigned int *) smpArr) = ioread32(dev.virtbase);
+	printk("Read sample size: %u, %u\n", (unsigned int) smpArr[0].left, (unsigned int) smpArr[0].right);
 	// If there aren't enough samples, return
 	if ((uint16_t) smpArr[0].left < SAMPLENUM || (uint16_t) smpArr[1].right < SAMPLENUM)
 		return 1;
-	for (i = 0; i < SAMPLENUM; i++) {
+	for (i = 0; i < 2; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
+		printk("left: %d, right: %d\n", smpArr[0].left, smpArr[0].right);
 		udelay(1);
 	}
 	return 0;
