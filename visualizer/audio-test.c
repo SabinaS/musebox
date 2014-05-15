@@ -63,11 +63,11 @@ int main()
             close(box_fd);
             return -1;
         }
-        // if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
-        //     perror("ioctl write failed!");
-        //     close(box_fd);
-        //     return -1;
-        // }
+        if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
+            perror("ioctl write failed!");
+            close(box_fd);
+            return -1;
+        }
     }
     // Print out the values
     printf("left: %d, right %d\n", samples[0].left, samples[0].right);
