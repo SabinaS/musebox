@@ -30,10 +30,10 @@ int main()
     struct sample samples[SAMPLENUM] = {0};
     int i;
     // 1 K sine wave
-    // for (i = 0; i < SAMPLENUM; i++) {
-    //     samples[i].left = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
-    //     samples[i].right = 32767 * sin(1000 * (2 * M_PI) * i / 44100);
-    // }
+    for (i = 0; i < SAMPLENUM; i++) {
+        samples[i].left = 16383 * sin(250 * (2 * M_PI) * i / 44100);
+        samples[i].right = 16383 * sin(250 * (2 * M_PI) * i / 44100);
+    }
 
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
         fprintf(stderr, "could not open %s\n", file);
@@ -53,16 +53,16 @@ int main()
     //     slot.height = height;
     printf("size of sample: %lu\n", sizeof(struct sample));
     while (1) {
-        while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
-            if (errno == EAGAIN) {
+        // while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+        //     if (errno == EAGAIN) {
                 nanosleep(&duration, &remaining);
-                continue;
-            }
-            fprintf(stderr, "errno: %d\n", errno);
-            perror("ioctl read failed!");
-            close(box_fd);
-            return -1;
-        }
+        //         continue;
+        //     }
+        //     fprintf(stderr, "errno: %d\n", errno);
+        //     perror("ioctl read failed!");
+        //     close(box_fd);
+        //     return -1;
+        // }
         if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
             perror("ioctl write failed!");
             close(box_fd);
