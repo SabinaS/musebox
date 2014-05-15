@@ -55,7 +55,9 @@ int main()
         while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
             if (errno == EAGAIN) {
                 nanosleep(&duration, &remaining);
+                continue;
             }
+            fprintf(stderr, "errno: %d\n", errno);
             perror("ioctl read failed!");
             close(box_fd);
             return -1;

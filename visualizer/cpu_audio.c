@@ -57,7 +57,6 @@ static int readAudio(struct sample *smpArr)
 		return 1;
 	for (i = 0; i < SAMPLENUM; i++) {
 		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 1);
-		udelay(1);
 	}
 	return 0;
 }
