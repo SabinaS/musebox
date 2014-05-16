@@ -7,6 +7,10 @@
 #define CPU_AUDIO_US
 #include "../cpu_audio.h"
 
+#define SAMPLE_RATE 44100
+
+static int slot_values[12] = {31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000};
+
 int main(void)
 {
 	int i;
@@ -24,16 +28,16 @@ int main(void)
 	for(i = 0; i < Npoints; i++)
 	{
 		in[i] = i + 0 * I;
-		printf("%d %11.7f %11.7f\n", i, creal(in[i]), cimag(in[i]));		//creal and cimag are functions of complex.h 
+		// printf("%d %11.7f %11.7f\n", i, creal(in[i]), cimag(in[i]));		//creal and cimag are functions of complex.h 
 	}
 	printf("\n");
 
 	fftw_execute(plan); 								//Execution of FFT
 
-	printf("Output:\n\n");
+	printf("Output Amplitude:\n\n");
 	for(i = 0; i < Npoints; i++)
 	{
-		printf("%d %11.7f %11.7f\n", i, creal(out[i]), cimag(out[i]));
+		printf("%d %f\n", i, 10 * log(creal(out[i]) * creal(out[i]) + cimag(out[i]) * cimag(out[i])));
 	}
 
 	fftw_execute(reverse_plan); 								//Execution of FFT
@@ -41,7 +45,7 @@ int main(void)
 	printf("Reverse output:\n\n");
 	for(i = 0; i < Npoints; i++)
 	{
-		printf("%d %11.7f %11.7f\n", i, creal(reverse[i]) / Npoints, cimag(reverse[i]));
+		// printf("%d %11.7f %11.7f\n", i, creal(reverse[i]) / Npoints, cimag(reverse[i]));
 	}
 
 	
