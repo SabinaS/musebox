@@ -53,16 +53,16 @@ int main()
     //     slot.height = height;
     printf("size of sample: %u\n", sizeof(struct sample));
     while (1) {
-        // while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
-        //     if (errno == EAGAIN) {
-               nanosleep(&duration, &remaining);
-        //        continue;
-        //     }
-        //     fprintf(stderr, "errno: %d\n", errno);
-        //     perror("ioctl read failed!");
-        //     close(box_fd);
-        //     return -1;
-        // }
+        while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+            if (errno == EAGAIN) {
+               // nanosleep(&duration, &remaining);
+               continue;
+            }
+            fprintf(stderr, "errno: %d\n", errno);
+            perror("ioctl read failed!");
+            close(box_fd);
+            return -1;
+        }
         // for (i = 32000; i < SAMPLENUM; i++)
         //     printf("%d: Sample left: %d, right: %d\n", i, samples[i].left, samples[i].right);
         // printf("Sample location: %p\n", samples);

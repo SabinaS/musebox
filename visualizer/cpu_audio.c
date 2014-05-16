@@ -86,7 +86,7 @@ static void writeAudio(struct sample *smpArr)
 		current_write_size = BUFFER_SIZE - (u16) buffer.left;
 		// If we can't write anything skip
 		printk("Write: %d, current: %d\n", current_write_size, (u16) buffer.left);
-		if (current_write_size < 1) continue;
+		if (current_write_size < 1) return; // continue;
 		// Calculate how many bytes to write
 		current_write_size = min(current_write_size, remaining);
 		// // Write the appropriate number
