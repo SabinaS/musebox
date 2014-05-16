@@ -19,7 +19,7 @@
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
 
-static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L * 32768L * 1000};
+static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L * 16384L * 1000};
 static struct timespec remaining;
 
 int main()
@@ -55,7 +55,7 @@ int main()
     while (1) {
         // while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
         //     if (errno == EAGAIN) {
-               // nanosleep(&duration, &remaining);
+               nanosleep(&duration, &remaining);
         //        continue;
         //     }
         //     fprintf(stderr, "errno: %d\n", errno);
@@ -65,7 +65,7 @@ int main()
         // }
         // for (i = 32000; i < SAMPLENUM; i++)
         //     printf("%d: Sample left: %d, right: %d\n", i, samples[i].left, samples[i].right);
-        printf("Sample location: %p\n", samples);
+        // printf("Sample location: %p\n", samples);
         if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
             perror("ioctl write failed!");
             close(box_fd);
@@ -74,11 +74,11 @@ int main()
     }
     // Print out the values
     // Sensible values
-    for (i = 0; i < SAMPLENUM; i++) {
-        if ((int) abs(samples[i].left) > 4000 || (int) abs(samples[i].right) > 4000)
-            break;
-        printf("left: %d, right %d\n", samples[i].left, samples[i].right);
-    }
+    // for (i = 0; i < SAMPLENUM; i++) {
+    //     if ((int) abs(samples[i].left) > 4000 || (int) abs(samples[i].right) > 4000)
+    //         break;
+    //     printf("left: %d, right %d\n", samples[i].left, samples[i].right);
+    // }
     //     usleep(1/60.0 * 100000);
     //     if (height == 479)
     //         dir = 0;

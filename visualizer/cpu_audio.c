@@ -78,7 +78,7 @@ static void writeAudio(struct sample *smpArr)
 	struct sample buffer;
 	unsigned int current_write_size, remaining = SAMPLENUM;
 	printk("Called\n");
-	do {
+	// do {
 		// address 3 indicates the number of words in the write FIFO
 		*((unsigned int *) &buffer) = ioread32(dev.virtbase + 8);
 		printk("Value read: %x\n", *((unsigned int *) &buffer));
@@ -95,7 +95,7 @@ static void writeAudio(struct sample *smpArr)
 		}
 		// Update the remaining size
 		remaining = remaining - current_write_size;
-	} while (remaining != 0);
+	// } while (remaining != 0);
 }
 
 /*
