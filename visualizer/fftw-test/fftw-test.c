@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <float.h>
 
 #define CPU_AUDIO_US
@@ -22,7 +23,7 @@
 #define MAX_HEIGHT 479
 
 static int slot_values[14] = {0, 31, 72, 150, 250, 440, 630, 1000, 2500, 5000, 8000, 14000, 20000, 22050};
-static double equalizer_multiples[14] = {1, 1, 1, 1, 1, 1, 0.125, 0.125, 0.125, 1, 1, 1, 1, 1};
+static volatile double equalizer_multiples[14] = {1, 1, 1, 1, 1, 1, 0.125, 0.125, 0.125, 1, 1, 1, 1, 1};
 static double slot_heights[12];
 static freq_slot slots[12];
 
@@ -54,6 +55,7 @@ int main(void)
 	plan = fftw_plan_dft_1d(Npoints, in, out, FFTW_FORWARD, FFTW_ESTIMATE); 	//Here we set which kind of transformation we want to perform
 	reverse_plan = fftw_plan_dft_1d(Npoints, out, reverse, FFTW_BACKWARD, FFTW_ESTIMATE);
 
+	while (1) {
 	while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
 		if (errno == EAGAIN) {
 		   // nanosleep(&duration, &remaining);
@@ -184,6 +186,7 @@ int main(void)
 		close(box_fd);
 		close(frec_spec_fd);
 		return -1;
+	}
 	}
 	
 	fftw_destroy_plan(plan);							//Destroy plan

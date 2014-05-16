@@ -64,38 +64,38 @@ static int readAudio(struct sample *smpArr)
 	// if ((uint16_t) smpArr[0].left % 10 == 0)
 	// 	printk("Copying: %u samples\n", (uint16_t) smpArr[0].left);
 	// printk("size of struct: %lu, unsigned int: %d\n", sizeof(struct sample), sizeof(unsigned int));
-	for (i = 0; i < SAMPLENUM; i++) {
-		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
-		// printk("Left: %d, Right %d.\n", smpArr[i].left, smpArr[i].right);
-	}
+	ioread32_rep(dev.virtbase + 4, smpArr, SAMPLENUM);
+	// for (i = 0; i < SAMPLENUM; i++) {
+	// 	((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
+	// 	// printk("Left: %d, Right %d.\n", smpArr[i].left, smpArr[i].right);
+	// }
 	return 0;
 }
 
 static void writeAudio(struct sample *smpArr)
 {
-	int i, pos = 0;
 	// First, determine how empty the buffer is
 	struct sample buffer;
-	unsigned int current_write_size, remaining = SAMPLENUM;
+	int pos = 0, i;
+	unsigned int current_write_size;
 	printk("Called\n");
-	// do {
+	do {
 		// address 3 indicates the number of words in the write FIFO
+		// for (i = 0; i < 1000; i++)
 		*((unsigned int *) &buffer) = ioread32(dev.virtbase + 8);
-		printk("Value read: %x\n", *((unsigned int *) &buffer));
+		printk("Value read: 0x%x\n", *((unsigned int *) &buffer));
 		// Assuming they're roughly equal
-		current_write_size = BUFFER_SIZE - (u16) buffer.left;
+		current_write_size = min(BUFFER_SIZE - (u16) buffer.left, BUFFER_SIZE - (u16) buffer.right);
 		// If we can't write anything skip
-		printk("Write: %d, current: %d\n", current_write_size, (u16) buffer.left);
-		if (current_write_size < 1) return; // continue;
-		// Calculate how many bytes to write
-		current_write_size = min(current_write_size, remaining);
+		printk("Write: %d, current: %d\n", current_write_size, max((u16) buffer.left, (u16) buffer.right));
+		if (current_write_size < SAMPLENUM * 2 - 1) continue; // only write full bursts;
 		// // Write the appropriate number
-		for (i = 0; i < current_write_size; i++) {
-			iowrite32(((unsigned int *) smpArr)[pos++], dev.virtbase);
-		}
-		// Update the remaining size
-		remaining = remaining - current_write_size;
-	// } while (remaining != 0);
+		iowrite32_rep(dev.virtbase, smpArr, SAMPLENUM);
+		// for (i = 0; i < SAMPLENUM; i++) {
+		// 	iowrite32(((unsigned int *) smpArr)[pos++], dev.virtbase);
+		// }
+		break;
+	} while (1);
 }
 
 /*

@@ -4,7 +4,7 @@
 #include <linux/ioctl.h>
 
 #define CPU_AUDIO_MAGIC 'r' * 7
-#define SAMPLENUM 32768
+#define SAMPLENUM 8192
 #define BUFFER_SIZE 65535
 
 #ifndef CPU_AUDIO_US
