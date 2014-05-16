@@ -19,7 +19,7 @@
 #define CPU_AUDIO_US
 #include "cpu_audio.h"
 
-static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L};
+static struct timespec duration = {.tv_sec = 0, .tv_nsec = 23L * 32768L * 1000};
 static struct timespec remaining;
 
 int main()
@@ -30,10 +30,10 @@ int main()
     struct sample *samples = (struct sample *) calloc(SAMPLENUM, sizeof(struct sample));
     int i;
     // 1 K sine wave
-    // for (i = 0; i < SAMPLENUM; i++) {
-    //     samples[i].left = 16383 * sin(250 * (2 * M_PI) * i / 44100);
-    //     samples[i].right = 16383 * sin(250 * (2 * M_PI) * i / 44100);
-    // }
+    for (i = 0; i < SAMPLENUM; i++) {
+        samples[i].left = 16383 * sin(250 * 44100 / SAMPLENUM * (2 * M_PI) * i / SAMPLENUM);
+        samples[i].right = 16383 * sin(250 * 44100 / SAMPLENUM * (2 * M_PI) * i / SAMPLENUM);
+    }
 
     if ((box_fd = open(file, O_RDWR)) == -1 ) {
         fprintf(stderr, "could not open %s\n", file);
@@ -52,18 +52,18 @@ int main()
     //         bar = 0;
     //     slot.height = height;
     printf("size of sample: %u\n", sizeof(struct sample));
-    //while (1) {
-        while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
-            if (errno == EAGAIN) {
-               //nanosleep(&duration, &remaining);
-               continue;
-            }
-            fprintf(stderr, "errno: %d\n", errno);
-            perror("ioctl read failed!");
-            close(box_fd);
-            return -1;
-        }
-        // for (i = 0; i < SAMPLENUM; i++)
+    while (1) {
+        // while (ioctl(box_fd, CPU_AUDIO_READ_SAMPLES, samples)) {
+        //     if (errno == EAGAIN) {
+               // nanosleep(&duration, &remaining);
+        //        continue;
+        //     }
+        //     fprintf(stderr, "errno: %d\n", errno);
+        //     perror("ioctl read failed!");
+        //     close(box_fd);
+        //     return -1;
+        // }
+        // for (i = 32000; i < SAMPLENUM; i++)
         //     printf("%d: Sample left: %d, right: %d\n", i, samples[i].left, samples[i].right);
         printf("Sample location: %p\n", samples);
         if (ioctl(box_fd, CPU_AUDIO_WRITE_SAMPLES, samples)) {
@@ -71,9 +71,14 @@ int main()
             close(box_fd);
             return -1;
         }
-    //}
+    }
     // Print out the values
-    printf("left: %d, right %d\n", samples[0].left, samples[0].right);
+    // Sensible values
+    for (i = 0; i < SAMPLENUM; i++) {
+        if ((int) abs(samples[i].left) > 4000 || (int) abs(samples[i].right) > 4000)
+            break;
+        printf("left: %d, right %d\n", samples[i].left, samples[i].right);
+    }
     //     usleep(1/60.0 * 100000);
     //     if (height == 479)
     //         dir = 0;

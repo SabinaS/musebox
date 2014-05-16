@@ -3,8 +3,9 @@
 
 #include <linux/ioctl.h>
 
-#define CPU_AUDIO_MAGIC 4108 * 11
+#define CPU_AUDIO_MAGIC 'r' * 7
 #define SAMPLENUM 32768
+#define BUFFER_SIZE 65535
 
 #ifndef CPU_AUDIO_US
 struct sample {
@@ -20,6 +21,6 @@ struct sample {
 
 /* ioctls and their arguments */
 #define CPU_AUDIO_READ_SAMPLES _IOR(CPU_AUDIO_MAGIC, 1, struct sample *) //writes to freq_spec.sv 
-#define CPU_AUDIO_WRITE_SAMPLES _IOW(CPU_AUDIO_MAGIC, 1, struct sample *) //writes to freq_spec.sv 
+#define CPU_AUDIO_WRITE_SAMPLES _IOWR(CPU_AUDIO_MAGIC, 2, struct sample *) //writes to freq_spec.sv 
 
 #endif

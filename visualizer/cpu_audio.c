@@ -46,6 +46,8 @@ struct cpu_audio_dev {
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
 } dev;
 
+static struct sample *smpArr;
+
 // Read the whole transform length from the fft
 static int readAudio(struct sample *smpArr)
 {
@@ -63,18 +65,37 @@ static int readAudio(struct sample *smpArr)
 	// 	printk("Copying: %u samples\n", (uint16_t) smpArr[0].left);
 	// printk("size of struct: %lu, unsigned int: %d\n", sizeof(struct sample), sizeof(unsigned int));
 	for (i = 0; i < SAMPLENUM; i++) {
-		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 1);
-		printk("Sample %d: left: %d, %d\n", i, smpArr[0].left, smpArr[0].right);
+		((unsigned int *) smpArr)[i] = ioread32(dev.virtbase + 4);
+		// printk("Left: %d, Right %d.\n", smpArr[i].left, smpArr[i].right);
 	}
 	return 0;
 }
 
 static void writeAudio(struct sample *smpArr)
 {
-	int i;
-	for (i = 0; i < SAMPLENUM; i++) {
-		iowrite32(((unsigned int *) smpArr)[i], dev.virtbase);
-	}
+	int i, pos = 0;
+	// First, determine how empty the buffer is
+	struct sample buffer;
+	unsigned int current_write_size, remaining = SAMPLENUM;
+	printk("Called\n");
+	do {
+		// address 3 indicates the number of words in the write FIFO
+		*((unsigned int *) &buffer) = ioread32(dev.virtbase + 8);
+		printk("Value read: %x\n", *((unsigned int *) &buffer));
+		// Assuming they're roughly equal
+		current_write_size = BUFFER_SIZE - (u16) buffer.left;
+		// If we can't write anything skip
+		printk("Write: %d, current: %d\n", current_write_size, (u16) buffer.left);
+		if (current_write_size < 1) continue;
+		// Calculate how many bytes to write
+		current_write_size = min(current_write_size, remaining);
+		// // Write the appropriate number
+		for (i = 0; i < current_write_size; i++) {
+			iowrite32(((unsigned int *) smpArr)[pos++], dev.virtbase);
+		}
+		// Update the remaining size
+		remaining = remaining - current_write_size;
+	} while (remaining != 0);
 }
 
 /*
@@ -83,9 +104,8 @@ static void writeAudio(struct sample *smpArr)
  */
 static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
-	int i;
+	// int i;
 	char *to, *from;
-    struct sample *smpArr = kmalloc(SAMPLENUM * sizeof(struct sample), GFP_KERNEL); //allocating space for data array
     to = (char *) arg;
     from = (char *) smpArr;
     if (!smpArr)
@@ -95,42 +115,36 @@ static long cpu_audio_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 	case CPU_AUDIO_READ_SAMPLES:
 		if (copy_from_user(smpArr, (struct sample *) arg,
 				   sizeof(struct sample) * SAMPLENUM)) {
-			kfree(smpArr);
 			return -EACCES;
 		}
 		// If the returns is non zero, then tell the user to try again
 		if (readAudio(smpArr)) {
-			kfree(smpArr);
 			return -EAGAIN;
 		}
-		for (i = 0; i < SAMPLENUM * sizeof(struct sample); i++) {
-			if (copy_from_user(from + i,  to + i, 1) != 0)
-				break;
-		}
-		printk("Bytes read: %d, expected size: %d\n", i, sizeof(struct sample) * SAMPLENUM);
-		// if (copy_to_user((struct sample *) arg, smpArr,
-		// 		 sizeof(struct sample) * SAMPLENUM)) {
-		// 	kfree(smpArr);
-		// 	return -EACCES;
+		// for (i = 0; i < SAMPLENUM * sizeof(struct sample); i++) {
+		// 	if (copy_from_user(from + i,  to + i, 1) != 0)
+		// 		break;
 		// }
+		// printk("Bytes read: %d, expected size: %d\n", i, sizeof(struct sample) * SAMPLENUM);
+		if (copy_to_user((struct sample *) arg, smpArr,
+				 sizeof(struct sample) * SAMPLENUM)) {
+			return -EACCES;
+		}
         printk("user location: %p\n", (void *) arg);
 		break;
 
 	case CPU_AUDIO_WRITE_SAMPLES:
 		if (copy_from_user(smpArr, (struct sample *) arg,
 				   sizeof(struct sample) * SAMPLENUM)) {
-			kfree(smpArr);
 			return -EACCES;
 		}
 		writeAudio(smpArr);
 		break;
 
 	default:
-		kfree(smpArr);
 		return -EINVAL;
 	}
 
-	kfree(smpArr);
 	return 0;
 }
 
@@ -221,6 +235,7 @@ static struct platform_driver cpu_audio_driver = {
 static int __init cpu_audio_init(void)
 {
 	pr_info(DRIVER_NAME ": init\n");
+	smpArr = kmalloc(SAMPLENUM * sizeof(struct sample), GFP_KERNEL);
 	return platform_driver_probe(&cpu_audio_driver, cpu_audio_probe);
 }
 
@@ -228,6 +243,7 @@ static int __init cpu_audio_init(void)
 static void __exit cpu_audio_exit(void)
 {
 	platform_driver_unregister(&cpu_audio_driver);
+	kfree(smpArr);
 	pr_info(DRIVER_NAME ": exit\n");
 }
 

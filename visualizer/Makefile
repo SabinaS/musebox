@@ -13,7 +13,7 @@ else
 default: module audio-test
 
 .PHONY: audio-test
-audio-test:
+audio-test: audio-test.c cpu_audio.h
 	gcc -g -Wall -o audio-test audio-test.c -lm
 
 module:
